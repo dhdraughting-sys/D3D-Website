@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>MEP Quick Calcs</title>
+<style>
+:root {
+  --accent: #1F3A4D;
+  --accent-dark: #16303F;
+  --panel-bg: #E7EBEE;
+  --content-bg: #F5F7F8;
+  --border: #C1C8CE;
+  --selected-bg: #C3D3E0;
+  --section-header-bg: #3D5A6C;
+  --text: #22262A;
+  --input-bg: #FFFFFF;
+  --muted: #6B7A90;
+  --red: #C0392B;
+  --amber: #B8860B;
+  --green: #2E7D32;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #4F9FCB;
+    --accent-dark: #3D7FA6;
+    --panel-bg: #2A2E32;
+    --content-bg: #191C1F;
+    --border: #454B51;
+    --selected-bg: #2F4E63;
+    --section-header-bg: #2C4453;
+    --text: #E6E9EB;
+    --input-bg: #24272A;
+    --muted: #9AA7B5;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--content-bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Tahoma, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+header {
+  background: var(--accent);
+  color: #fff;
+  padding: 14px 16px 10px;
+  position: sticky; top: 0; z-index: 20;
+}
+header h1 {
+  margin: 0 0 2px;
+  font-size: 17px;
+  font-weight: 600;
+}
+header p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.85;
+}
+nav.tabs {
+  display: flex;
+  overflow-x: auto;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 56px; z-index: 19;
+  -webkit-overflow-scrolling: touch;
+}
+nav.tabs button {
+  flex: 1 0 auto;
+  min-width: 84px;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+nav.tabs button.active {
+  color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  background: var(--selected-bg);
+}
+@media (prefers-color-scheme: dark) {
+  nav.tabs button.active { color: var(--accent); }
+}
+main { padding: 12px; max-width: 720px; margin: 0 auto 60px; }
+.panel { display: none; }
+.panel.active { display: block; }
+.subtabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.subtabs button {
+  padding: 7px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.subtabs button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.card h2 {
+  font-size: 14px;
+  margin: 0 0 10px;
+  color: var(--accent);
+}
+.note {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+.field { margin-bottom: 12px; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.field .hint {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: 400;
+  display: block;
+  margin-top: 2px;
+}
+.field input[type=number], .field select {
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 15px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.row2 { display: flex; gap: 10px; }
+.row2 .field { flex: 1; min-width: 0; }
+.quickpick {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  margin-top: 6px;
+}
+.quickpick button {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  padding: 5px 9px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.results { margin-top: 4px; }
+.results .card { border-left: 4px solid var(--accent); }
+.resrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 13px;
+  gap: 10px;
+}
+.resrow:last-child { border-bottom: none; }
+.resrow .k { color: var(--muted); }
+.resrow .v { font-weight: 700; text-align: right; }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #fff;
+}
+.badge.pass { background: var(--green); }
+.badge.warn { background: var(--amber); }
+.badge.fail { background: var(--red); }
+.verdict {
+  font-size: 13.5px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+footer {
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--muted);
+  padding: 16px 20px 30px;
+}
+footer a { color: var(--accent); }
+.d3d-back {
+  display: block; text-align: center; font-size: 11.5px; font-weight: 600;
+  color: #fff; background: var(--accent-dark); text-decoration: none; padding: 7px 10px;
+}
+.disclaimer {
+  background: #FBF0DD; border: 1px solid #E8CE9A; color: #6B5011;
+  font-size: 11.5px; line-height: 1.5; padding: 10px 16px; margin: 0;
+}
+@media (prefers-color-scheme: dark) {
+  .disclaimer { background: #3a3220; border-color: #5c4c25; color: #e6d3a0; }
+}
+</style>
+</head>
+<body>
+
+<a class="d3d-back" href="tools.html">&larr; Back to D3D — Services, Capability &amp; Contact</a>
+<header>
+  <h1>MEP Quick Calcs</h1>
+  <p>Same formulas as MEP Design Platform &ndash; standalone, no project link. Type figures in for a quick on-site check.</p>
+</header>
+<p class="disclaimer">All calculations follow relevant CIBSE / IHVE / Building Regulations methodology, but are provided for <strong>indicative purposes only</strong>. Always have a qualified engineer verify figures before use on a live project — this tool is not a substitute for a full design check.</p>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="cws">Cold Water Storage</button>
+  <button class="tab-btn" data-tab="hws">Hot Water Storage</button>
+  <button class="tab-btn" data-tab="pds">Pipe / Duct Sizing</button>
+  <button class="tab-btn" data-tab="cond">Condensation</button>
+</nav>
+
+<main>
+
+<!-- ============================= COLD WATER STORAGE ============================= -->
+<section class="panel active" id="panel-cws">
+  <div class="card">
+    <h2>Cold Water Storage</h2>
+    <p class="note">CIBSE/IHVE Plumbing Engineering Services Design Guide method: Storage Required = Daily Demand &times; Storage % (not peak-flow &times; hours &ndash; UK cisterns are primarily sized to cover a mains interruption, not smooth peak demand). Legionella check is a turnover calc: Selected Tank &divide; Average Hourly Demand, flagged if it exceeds 24 hours.</p>
+
+    <div class="field">
+      <label>Total Occupancy (beds / persons)</label>
+      <input type="number" id="cws_occ" value="89" min="0" step="1">
+    </div>
+
+    <div class="field">
+      <label>Daily Demand Rate (L / person / day)</label>
+      <input type="number" id="cws_rate" value="45" min="0" step="0.5">
+      <span class="hint">App default is 45 L/person (office figure). BS 6700 Table 1 (withdrawn, still widely cited &ndash; confirm against BS 8558/manufacturer data) gives higher institutional figures below.</span>
+      <div class="quickpick" id="cws_rate_picks"></div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Storage % of Daily Demand</label>
+        <input type="number" id="cws_pct" value="25" min="0" max="200" step="1">
+      </div>
+      <div class="field">
+        <label>Manual Tank Override (L)</label>
+        <input type="number" id="cws_manual" placeholder="auto" min="0" step="1">
+      </div>
+    </div>
+    <div class="quickpick" id="cws_pct_picks"></div>
+  </div>
+
+  <div class="results">
+    <div class="card">
+      <h2>Result</h2>
+      <div id="cws_verdict" class="verdict"></div>
+      <div class="resrow"><span class="k">Daily Demand</span><span class="v" id="cws_daily"></span></div>
+      <div class="resrow"><span class="k">Average Hourly Demand</span><span class="v" id="cws_avghr"></span></div>
+      <div class="resrow"><span class="k">Storage Required</span><span class="v" id="cws_req"></span></div>
+      <div class="resrow"><span class="k">Selected Tank (auto, standard sizes)</span><span class="v" id="cws_tank"></span></div>
+      <div class="resrow"><span class="k">Turnover</span><span class="v" id="cws_turnover"></span></div>
+      <div class="resrow"><span class="k">Legionella turnover check (&le;24hr)</span><span class="v" id="cws_compliant"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= HOT WATER STORAGE ============================= -->
+<section class="panel" id="panel-hws">
+  <div class="card">
+    <h2>Hot Water Storage</h2>
+    <p class="note">CIBSE Guide G Section 2 / CIBSE Journal CPD Module 74 method: Daily Demand &rarr; Peak Period Demand (editable fraction &ndash; not a published standard figure) &rarr; Storage Required (grossed up by the 80% usable-storage/stratification factor) &rarr; Required Reheat kW to recover the selected volume within the peak period.</p>
+
+    <div class="field">
+      <label>Total Occupancy</label>
+      <input type="number" id="hws_occ" value="89" min="0" step="1">
+    </div>
+
+    <div class="field">
+      <label>Demand Rate (L / person / day)</label>
+      <input type="number" id="hws_rate" value="40" min="0" step="0.5">
+      <span class="hint">App default: 40 L/person (office, no canteen). No CIBSE Guide G-attributed care home figure exists &ndash; enter a project-specific rate.</span>
+      <div class="quickpick" id="hws_rate_picks"></div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Peak Demand Fraction (%)</label>
+        <input type="number" id="hws_frac" value="33" min="0" max="100" step="1">
+      </div>
+      <div class="field">
+        <label>Peak Period (hrs)</label>
+        <input type="number" id="hws_period" value="2.0" min="0.1" step="0.1">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Storage Temp (&deg;C)</label>
+        <input type="number" id="hws_storet" value="60" step="0.5">
+        <span class="hint">HSE ACOP L8/HSG274 minimum: 60&deg;C</span>
+      </div>
+      <div class="field">
+        <label>Cold Feed Temp (&deg;C)</label>
+        <input type="number" id="hws_feedt" value="10" step="0.5">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Manual Storage Override (L)</label>
+      <input type="number" id="hws_manual" placeholder="auto" min="0" step="1">
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="card">
+      <h2>Result</h2>
+      <div id="hws_verdict" class="verdict"></div>
+      <div class="resrow"><span class="k">Daily Demand</span><span class="v" id="hws_daily"></span></div>
+      <div class="resrow"><span class="k">Peak Period Demand</span><span class="v" id="hws_peak"></span></div>
+      <div class="resrow"><span class="k">Storage Required</span><span class="v" id="hws_req"></span></div>
+      <div class="resrow"><span class="k">Selected Storage</span><span class="v" id="hws_sel"></span></div>
+      <div class="resrow"><span class="k">&Delta;T</span><span class="v" id="hws_dt"></span></div>
+      <div class="resrow"><span class="k">Required Reheat</span><span class="v" id="hws_kw"></span></div>
+      <div class="resrow"><span class="k">Storage &ge;60&deg;C (Legionella)</span><span class="v" id="hws_legionella"></span></div>
+      <div class="resrow"><span class="k">Covers peak demand</span><span class="v" id="hws_peakcheck"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= PIPE / DUCT SIZING ============================= -->
+<section class="panel" id="panel-pds">
+  <div class="subtabs">
+    <button class="sub-btn active" data-sub="pds-pipe" data-group="pds">Pipe</button>
+    <button class="sub-btn" data-sub="pds-duct" data-group="pds">Duct</button>
+  </div>
+
+  <div class="subpanel active" id="pds-pipe">
+    <div class="card">
+      <h2>Pipe Sizing</h2>
+      <p class="note">CIBSE Guide C Haaland equation (Ch.4, Eq 4.5) for the Darcy friction factor &ndash; smallest standard size whose friction pressure drop is at or below your target rate.</p>
+
+      <div class="field">
+        <label>Flow Rate (L/s)</label>
+        <input type="number" id="pipe_flow" value="1.0" min="0" step="0.01">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Material</label>
+          <select id="pipe_material">
+            <option>Copper</option>
+            <option>Steel</option>
+            <option>Stainless Steel (Pressfit)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Water Temp (&deg;C)</label>
+          <input type="number" id="pipe_temp" value="10" step="0.5">
+        </div>
+      </div>
+      <div class="field">
+        <label>Target Friction Rate (Pa/m)</label>
+        <input type="number" id="pipe_target" value="300" min="1" step="10">
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="card">
+        <h2>Result</h2>
+        <div class="resrow"><span class="k">Selected Nominal Size</span><span class="v" id="pipe_size"></span></div>
+        <div class="resrow"><span class="k">Velocity</span><span class="v" id="pipe_vel"></span></div>
+        <div class="resrow"><span class="k">Reynolds Number</span><span class="v" id="pipe_re"></span></div>
+        <div class="resrow"><span class="k">Friction Factor (&lambda;)</span><span class="v" id="pipe_lambda"></span></div>
+        <div class="resrow"><span class="k">Pressure Drop</span><span class="v" id="pipe_dp"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subpanel" id="pds-duct" style="display:none;">
+    <div class="card">
+      <h2>Duct Sizing</h2>
+      <p class="note">Equal Friction Method, same simplified Darcy-Weisbach-based formula as the Ventilation Design tab &ndash; diameter solved directly at the target friction rate, rounded up to the nearest standard circular size.</p>
+
+      <div class="field">
+        <label>Required Airflow (L/s)</label>
+        <input type="number" id="duct_flow" value="200" min="0" step="1">
+      </div>
+      <div class="field">
+        <label>Target Friction Rate (Pa/m)</label>
+        <input type="number" id="duct_target" value="1.0" min="0.1" step="0.1">
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="card">
+        <h2>Result</h2>
+        <div class="resrow"><span class="k">Calculated Diameter (raw)</span><span class="v" id="duct_raw"></span></div>
+        <div class="resrow"><span class="k">Selected Standard Size</span><span class="v" id="duct_size"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= CONDENSATION ============================= -->
+<section class="panel" id="panel-cond">
+  <div class="subtabs">
+    <button class="sub-btn active" data-sub="cond-pipe" data-group="cond">Pipe</button>
+    <button class="sub-btn" data-sub="cond-duct" data-group="cond">Duct</button>
+    <button class="sub-btn" data-sub="cond-room" data-group="cond">Room Surface</button>
+  </div>
+
+  <!-- ---- Pipe condensation ---- -->
+  <div class="subpanel active" id="cond-pipe">
+    <div class="card">
+      <h2>Pipe Insulation Condensation Risk</h2>
+      <p class="note">Checks an insulated pipe's outer surface temperature against the dew point of the surrounding air (BS 5422-style, radial/cylindrical resistance network) &ndash; CIBSE Guide C Table 3.25 film coefficients.</p>
+
+      <div class="row2">
+        <div class="field">
+          <label>Fluid Temperature (&deg;C)</label>
+          <input type="number" id="cpipe_fluid" value="6.0" step="0.5">
+        </div>
+        <div class="field">
+          <label>Ambient Temperature (&deg;C)</label>
+          <input type="number" id="cpipe_amb" value="24.0" step="0.5">
+        </div>
+      </div>
+      <div class="field">
+        <label>Ambient RH (%)</label>
+        <input type="number" id="cpipe_rh" value="50" min="1" max="100" step="1">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Pipe Material</label>
+          <select id="cpipe_material"><option>Copper</option><option>Steel</option></select>
+        </div>
+        <div class="field">
+          <label>Nominal Size</label>
+          <select id="cpipe_size"></select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Insulation Thickness (mm)</label>
+          <input type="number" id="cpipe_thick" value="25" min="0" step="1">
+        </div>
+        <div class="field">
+          <label>Insulation &lambda; (W/mK)</label>
+          <input type="number" id="cpipe_k" value="0.036" min="0.001" step="0.001">
+        </div>
+      </div>
+      <div class="field">
+        <label>Jacket / Finish</label>
+        <select id="cpipe_jacket">
+          <option value="10.0">Non-reflective jacket (PVC/canvas)</option>
+          <option value="5.7">Reflective jacket (foil-faced)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="card">
+        <div id="cpipe_verdict" class="verdict"></div>
+        <div class="resrow"><span class="k">Surface Temperature</span><span class="v" id="cpipe_surf"></span></div>
+        <div class="resrow"><span class="k">Dew Point</span><span class="v" id="cpipe_dew"></span></div>
+        <div class="resrow"><span class="k">Margin</span><span class="v" id="cpipe_margin"></span></div>
+        <div class="resrow"><span class="k">Min. thickness to clear dew point</span><span class="v" id="cpipe_req"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Duct condensation ---- -->
+  <div class="subpanel" id="cond-duct" style="display:none;">
+    <div class="card">
+      <h2>Duct Insulation Condensation Risk</h2>
+      <p class="note">Same dew-point/bisection method as the pipe check, but a planar (not radial) series-resistance calc &ndash; a duct's insulation wraps large, close-to-flat panel faces, so no diameter/OD input is needed. (New in v2.232.)</p>
+
+      <div class="row2">
+        <div class="field">
+          <label>Duct Air Temperature (&deg;C)</label>
+          <input type="number" id="cduct_air" value="17.0" step="0.5">
+        </div>
+        <div class="field">
+          <label>Ambient Temperature (&deg;C)</label>
+          <input type="number" id="cduct_amb" value="29.0" step="0.5">
+        </div>
+      </div>
+      <div class="field">
+        <label>Ambient RH (%)</label>
+        <input type="number" id="cduct_rh" value="50" min="1" max="100" step="1">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Insulation Thickness (mm)</label>
+          <input type="number" id="cduct_thick" value="25" min="0" step="1">
+        </div>
+        <div class="field">
+          <label>Insulation &lambda; (W/mK)</label>
+          <input type="number" id="cduct_k" value="0.040" min="0.001" step="0.001">
+        </div>
+      </div>
+      <div class="field">
+        <label>Jacket / Finish</label>
+        <select id="cduct_jacket">
+          <option value="10.0">Non-reflective jacket (PVC/canvas)</option>
+          <option value="5.7">Reflective jacket (foil-faced)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="card">
+        <div id="cduct_verdict" class="verdict"></div>
+        <div class="resrow"><span class="k">Surface Temperature</span><span class="v" id="cduct_surf"></span></div>
+        <div class="resrow"><span class="k">Dew Point</span><span class="v" id="cduct_dew"></span></div>
+        <div class="resrow"><span class="k">Margin</span><span class="v" id="cduct_margin"></span></div>
+        <div class="resrow"><span class="k">Min. thickness to clear dew point</span><span class="v" id="cduct_req"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Room surface condensation ---- -->
+  <div class="subpanel" id="cond-room" style="display:none;">
+    <div class="card">
+      <h2>Room Surface Condensation Risk</h2>
+      <p class="note">Single-surface version of the Psychrometric Chart's Room Surface Condensation Risk check (BS EN ISO 13788 temperature factor method). Winter conditions &ndash; surface condensation is a cold-surface/warm-humid-air problem, worst case in winter.</p>
+
+      <div class="row2">
+        <div class="field">
+          <label>Internal Temp (&deg;C)</label>
+          <input type="number" id="croom_int" value="24.0" step="0.5">
+        </div>
+        <div class="field">
+          <label>Internal RH (%)</label>
+          <input type="number" id="croom_rh" value="50" min="1" max="100" step="1">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>External Temp (&deg;C)</label>
+          <input type="number" id="croom_ext" value="-3.0" step="0.5">
+          <span class="hint">UK winter design default: -3&deg;C</span>
+        </div>
+        <div class="field">
+          <label>Element U-value (W/m&sup2;K)</label>
+          <input type="number" id="croom_u" value="0.30" min="0.01" step="0.01">
+        </div>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="card">
+        <div id="croom_verdict" class="verdict"></div>
+        <div class="resrow"><span class="k">Internal Surface Temperature</span><span class="v" id="croom_tsi"></span></div>
+        <div class="resrow"><span class="k">Dew Point</span><span class="v" id="croom_dew"></span></div>
+        <div class="resrow"><span class="k">f<sub>Rsi</sub></span><span class="v" id="croom_frsi"></span></div>
+        <div class="resrow"><span class="k">Margin</span><span class="v" id="croom_margin"></span></div>
+        <div class="resrow"><span class="k">Mould risk (f<sub>Rsi</sub> &lt; 0.75, BS 5250 dwellings)</span><span class="v" id="croom_mould"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  MEP Quick Calcs &ndash; ports the real formulas from MEP Design Platform's calc_engine.py.<br>
+  Standalone tool only &ndash; not linked to a project file. Advisory-grade, review before relying on it for a real design decision.
+</footer>
+
+<script>
+// =====================================================================
+// Shared reference data - ported 1:1 from reference_data.py
+// =====================================================================
+const STANDARD_TANK_SIZES = [13500, 9000, 6000, 4500, 3000, 2250, 1500, 1000, 500, 100];
+const COLD_WATER_STORAGE_REFERENCE = [
+  ["Hostel", 90, "per bed"],
+  ["Hotel", 200, "per bed"],
+  ["Children's home / residential nursery", 135, "per bed"],
+  ["Nurses' home", 120, "per bed"],
+  ["Nursing / convalescent home", 135, "per bed"],
+  ["Day school (nursery/primary/secondary)", 15, "per pupil"],
+  ["Boarding school", 90, "per pupil"],
+  ["Office - with canteen", 45, "per employee"],
+  ["Office - without canteen", 40, "per employee"],
+];
+const COLD_WATER_STORAGE_PERIOD_REFERENCE = [
+  ["Offices/shops/theatres (day-use)", 25],
+  ["Dwellings", 50],
+  ["24-hr occupancy (hotels, schools, hospitals, nursing homes)", 50],
+];
+const HOT_WATER_DEMAND_RATE_REFERENCE = [
+  ["Office - without canteen", 40],
+  ["Office - with canteen", 45],
+  ["Hotel - Budget", 135],
+  ["Hotel - Travel Inn type", 150],
+  ["Hospital - District General", 600],
+  ["Hospital - Surgical ward", 250],
+  ["Hospital - Medical ward", 220],
+  ["School - Nursery/Primary", 15],
+  ["School - Secondary", 20],
+];
+const HOT_WATER_STRATIFICATION_FACTOR = 0.8;
+const HOT_WATER_SPECIFIC_HEAT_KJ_PER_KGK = 4.186;
+
+const WATER_PROPERTIES_TABLE = {
+  10: [999.7, 1.3004], 20: [999.8, 1.0022], 40: [992.2, 0.6561],
+  50: [988.0, 0.5506], 60: [983.2, 0.4709], 70: [977.8, 0.4091],
+  80: [971.8, 0.3612], 90: [965.3, 0.3222],
+};
+const PIPE_ROUGHNESS_MM = { "Copper": 0.0015, "Steel": 0.045, "Stainless Steel (Pressfit)": 0.0015 };
+const COPPER_PIPE_SIZES_MM = { 15: 13.6, 22: 20.2, 28: 26.2, 35: 33.0, 42: 40.0, 54: 52.0, 66.7: 64.3, 76.1: 73.1, 108: 105.0, 133: 130.0 };
+const STEEL_PIPE_SIZES_MM = { 15: 15.8, 20: 21.0, 25: 26.6, 32: 35.2, 40: 41.0, 50: 52.9, 65: 68.7, 80: 80.8, 100: 105.4, 125: 130.9, 150: 155.4 };
+const STANDARD_DUCT_SIZES = [100, 125, 150, 200, 250, 315, 400, 500];
+
+const STEEL_PIPE_OD_MM = { 15: 21.7, 20: 27.2, 25: 34.2, 32: 42.9, 40: 48.8, 50: 60.8, 65: 76.6, 80: 89.5, 100: 114.9, 125: 140.6, 150: 165.1 };
+// Nominal copper size IS its own OD (see reference_data.py's note above STAINLESS_PRESSFIT_PIPE_SIZES_MM)
+const DEFAULT_PIPE_INSULATION_K_W_MK = 0.036;
+const DEFAULT_DUCT_INSULATION_K_W_MK = 0.040;
+
+const RISK_RED = "#C0392B", RISK_AMBER = "#B8860B", RISK_GREEN = "#2E7D32";
+
+// =====================================================================
+// Shared physics - ported 1:1 from calc_engine.py
+// =====================================================================
+function saturatedVapourPressureKpa(thetaC) {
+  const T = thetaC + 273.16;
+  const logPs = 30.59051 - 8.2 * Math.log10(T) + 2.4804e-3 * T - 3142.31 / T;
+  return Math.pow(10, logPs);
+}
+function moistureContentKgKg(thetaC, pctSat, pressureKpa = 101.325, fs = 1.0) {
+  const ps = saturatedVapourPressureKpa(thetaC);
+  const gs = 0.62197 * fs * ps / (pressureKpa - fs * ps);
+  return (pctSat / 100.0) * gs;
+}
+function dewPointTemperatureC(thetaC, pctSat, pressureKpa = 101.325, fs = 1.0) {
+  const g = moistureContentKgKg(thetaC, pctSat, pressureKpa, fs);
+  if (g <= 0) return -60.0;
+  let lo = -60.0, hi = thetaC;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2.0;
+    const gSatMid = moistureContentKgKg(mid, 100.0, pressureKpa, fs);
+    if (gSatMid < g) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2.0;
+}
+function waterProperties(tempC) {
+  const points = Object.keys(WATER_PROPERTIES_TABLE).map(Number).sort((a, b) => a - b);
+  if (tempC <= points[0]) { const [d, v] = WATER_PROPERTIES_TABLE[points[0]]; return [d, v * 1e-6]; }
+  if (tempC >= points[points.length - 1]) { const [d, v] = WATER_PROPERTIES_TABLE[points[points.length - 1]]; return [d, v * 1e-6]; }
+  for (let i = 0; i < points.length - 1; i++) {
+    const t0 = points[i], t1 = points[i + 1];
+    if (t0 <= tempC && tempC <= t1) {
+      const [d0, v0] = WATER_PROPERTIES_TABLE[t0], [d1, v1] = WATER_PROPERTIES_TABLE[t1];
+      const frac = (tempC - t0) / (t1 - t0);
+      return [d0 + frac * (d1 - d0), (v0 + frac * (v1 - v0)) * 1e-6];
+    }
+  }
+  const [d, v] = WATER_PROPERTIES_TABLE[points[points.length - 1]];
+  return [d, v * 1e-6];
+}
+function calculatePipeFriction(flowLs, diameterMm, tempC, roughnessMm) {
+  const [density, kinVisc] = waterProperties(tempC);
+  const dM = diameterMm / 1000;
+  const areaM2 = Math.PI * Math.pow(dM / 2, 2);
+  const velocity = areaM2 > 0 ? (flowLs / 1000) / areaM2 : 0.0;
+  if (velocity <= 0 || kinVisc <= 0) return { velocity_ms: 0, reynolds_number: 0, friction_factor: 0, pressure_drop_pa_per_m: 0 };
+  const reynolds = velocity * dM / kinVisc;
+  const kOverD = roughnessMm / diameterMm;
+  const invSqrtLambda = -1.8 * Math.log10(6.9 / reynolds + Math.pow(kOverD / 3.71, 1.11));
+  const frictionFactor = 1 / Math.pow(invSqrtLambda, 2);
+  const pressureDropPerM = frictionFactor * (density * Math.pow(velocity, 2) / 2) / dM;
+  return {
+    velocity_ms: round(velocity, 3), reynolds_number: round(reynolds, 0),
+    friction_factor: round(frictionFactor, 5), pressure_drop_pa_per_m: round(pressureDropPerM, 1),
+  };
+}
+function pipeSizesForMaterial(material) {
+  return { "Copper": COPPER_PIPE_SIZES_MM, "Steel": STEEL_PIPE_SIZES_MM, "Stainless Steel (Pressfit)": COPPER_PIPE_SIZES_MM }[material] || COPPER_PIPE_SIZES_MM;
+}
+function selectPipeSize(flowLs, tempC, material, targetPaPerM) {
+  const roughness = PIPE_ROUGHNESS_MM[material] || 0.045;
+  const sizes = pipeSizesForMaterial(material);
+  const nominals = Object.keys(sizes).map(Number).sort((a, b) => a - b);
+  for (const nominal of nominals) {
+    const result = calculatePipeFriction(flowLs, sizes[nominal], tempC, roughness);
+    if (result.pressure_drop_pa_per_m <= targetPaPerM) return [nominal, result];
+  }
+  return [null, null];
+}
+function selectDuctSize(requiredAirflowLs, targetFrictionPam) {
+  if (requiredAirflowLs <= 0) return [0.0, STANDARD_DUCT_SIZES[0]];
+  const diameterMm = Math.pow(
+    (0.020 * 1.2 * 8 * Math.pow(requiredAirflowLs / 1000, 2)) / (Math.pow(Math.PI, 2) * targetFrictionPam),
+    1 / 5
+  ) * 1000;
+  const selected = STANDARD_DUCT_SIZES.find(s => s >= diameterMm);
+  return [diameterMm, selected !== undefined ? selected : "Exceeds Std. Range"];
+}
+// ---- Pipe insulation condensation (radial/cylindrical) ----
+function pipeInsulationSurfaceTemperatureC(fluidTempC, ambientTempC, pipeOdMm, insulationThicknessMm, insulationKWMk, filmCoeff = 10.0) {
+  const r1 = pipeOdMm / 2000.0;
+  const r2 = r1 + insulationThicknessMm / 1000.0;
+  if (r2 <= r1 || insulationKWMk <= 0) return fluidTempC;
+  const rIns = Math.log(r2 / r1) / (2 * Math.PI * insulationKWMk);
+  const rSurf = 1.0 / (filmCoeff * 2 * Math.PI * r2);
+  const fractionToSurface = rSurf / (rIns + rSurf);
+  return ambientTempC - (ambientTempC - fluidTempC) * fractionToSurface;
+}
+function calculatePipeCondensationRisk(fluidTempC, ambientTempC, ambientRhPct, pipeOdMm, insulationThicknessMm, insulationKWMk, filmCoeff) {
+  const dewPoint = dewPointTemperatureC(ambientTempC, ambientRhPct);
+  const surfaceTemp = pipeInsulationSurfaceTemperatureC(fluidTempC, ambientTempC, pipeOdMm, insulationThicknessMm, insulationKWMk, filmCoeff);
+  const margin = surfaceTemp - dewPoint;
+  let requiredThickness = null;
+  if (ambientTempC > fluidTempC) {
+    const surf0 = pipeInsulationSurfaceTemperatureC(fluidTempC, ambientTempC, pipeOdMm, 0.0, insulationKWMk, filmCoeff);
+    const surf200 = pipeInsulationSurfaceTemperatureC(fluidTempC, ambientTempC, pipeOdMm, 200.0, insulationKWMk, filmCoeff);
+    if (surf0 >= dewPoint) requiredThickness = 0.0;
+    else if (surf200 < dewPoint) requiredThickness = null;
+    else {
+      let lo = 0.0, hi = 200.0;
+      for (let i = 0; i < 40; i++) {
+        const mid = (lo + hi) / 2.0;
+        const surfMid = pipeInsulationSurfaceTemperatureC(fluidTempC, ambientTempC, pipeOdMm, mid, insulationKWMk, filmCoeff);
+        if (surfMid >= dewPoint) hi = mid; else lo = mid;
+      }
+      requiredThickness = round(hi, 1);
+    }
+  }
+  return {
+    dew_point_c: round(dewPoint, 2), surface_temp_c: round(surfaceTemp, 2), margin_c: round(margin, 2),
+    condensation_risk: margin <= 0.0, required_insulation_thickness_mm: requiredThickness,
+  };
+}
+// ---- Duct insulation condensation (planar) - v2.232 ----
+function ductInsulationSurfaceTemperatureC(ductAirTempC, ambientTempC, insulationThicknessMm, insulationKWMk, filmCoeff = 10.0) {
+  if (insulationKWMk <= 0) return ductAirTempC;
+  const rIns = (insulationThicknessMm / 1000.0) / insulationKWMk;
+  const rSurf = 1.0 / filmCoeff;
+  const fractionToSurface = rSurf / (rIns + rSurf);
+  return ambientTempC - (ambientTempC - ductAirTempC) * fractionToSurface;
+}
+function calculateDuctCondensationRisk(ductAirTempC, ambientTempC, ambientRhPct, insulationThicknessMm, insulationKWMk, filmCoeff) {
+  const dewPoint = dewPointTemperatureC(ambientTempC, ambientRhPct);
+  const surfaceTemp = ductInsulationSurfaceTemperatureC(ductAirTempC, ambientTempC, insulationThicknessMm, insulationKWMk, filmCoeff);
+  const margin = surfaceTemp - dewPoint;
+  let requiredThickness = null;
+  if (ambientTempC > ductAirTempC) {
+    const surf0 = ductInsulationSurfaceTemperatureC(ductAirTempC, ambientTempC, 0.0, insulationKWMk, filmCoeff);
+    const surf200 = ductInsulationSurfaceTemperatureC(ductAirTempC, ambientTempC, 200.0, insulationKWMk, filmCoeff);
+    if (surf0 >= dewPoint) requiredThickness = 0.0;
+    else if (surf200 < dewPoint) requiredThickness = null;
+    else {
+      let lo = 0.0, hi = 200.0;
+      for (let i = 0; i < 40; i++) {
+        const mid = (lo + hi) / 2.0;
+        const surfMid = ductInsulationSurfaceTemperatureC(ductAirTempC, ambientTempC, mid, insulationKWMk, filmCoeff);
+        if (surfMid >= dewPoint) hi = mid; else lo = mid;
+      }
+      requiredThickness = round(hi, 1);
+    }
+  }
+  return {
+    dew_point_c: round(dewPoint, 2), surface_temp_c: round(surfaceTemp, 2), margin_c: round(margin, 2),
+    condensation_risk: margin <= 0.0, required_insulation_thickness_mm: requiredThickness,
+  };
+}
+// ---- Room surface condensation (single-surface) ----
+const R_SI_M2K_W = 0.13;
+const MOULD_RISK_F_RSI_THRESHOLD = 0.75;
+function calculateRoomSurfaceCondensation(internalDbtC, internalRhPct, externalDbtC, uValue) {
+  const dewPoint = dewPointTemperatureC(internalDbtC, internalRhPct);
+  const fRsi = 1.0 - uValue * R_SI_M2K_W;
+  const tSi = internalDbtC - uValue * R_SI_M2K_W * (internalDbtC - externalDbtC);
+  const margin = tSi - dewPoint;
+  return {
+    dew_point_c: round(dewPoint, 2), t_si_c: round(tSi, 2), f_rsi: round(fRsi, 3),
+    margin_c: round(margin, 2), condensation_risk: margin <= 0.0, mould_risk: fRsi < MOULD_RISK_F_RSI_THRESHOLD,
+  };
+}
+
+function round(v, n) { const m = Math.pow(10, n); return Math.round(v * m) / m; }
+function fmt(v, unit, dp = 1) { return (typeof v === "number" ? v.toFixed(dp) : v) + (unit ? " " + unit : ""); }
+function badge(ok, passText, failText, warnCond) {
+  if (warnCond) return `<span class="badge warn">${warnCond}</span>`;
+  return ok ? `<span class="badge pass">${passText}</span>` : `<span class="badge fail">${failText}</span>`;
+}
+
+// =====================================================================
+// Tab / subtab navigation
+// =====================================================================
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+});
+document.querySelectorAll(".sub-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const group = btn.dataset.group;
+    document.querySelectorAll(`.sub-btn[data-group="${group}"]`).forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(`#panel-${group} .subpanel`).forEach(p => p.style.display = "none");
+    document.getElementById(btn.dataset.sub).style.display = "";
+  });
+});
+
+// =====================================================================
+// Cold Water Storage
+// =====================================================================
+const cwsRatePicks = document.getElementById("cws_rate_picks");
+COLD_WATER_STORAGE_REFERENCE.forEach(([label, litres, basis]) => {
+  const b = document.createElement("button");
+  b.textContent = `${label}: ${litres} L (${basis})`;
+  b.addEventListener("click", () => { document.getElementById("cws_rate").value = litres; renderCWS(); });
+  cwsRatePicks.appendChild(b);
+});
+const cwsPctPicks = document.getElementById("cws_pct_picks");
+COLD_WATER_STORAGE_PERIOD_REFERENCE.forEach(([label, pct]) => {
+  const b = document.createElement("button");
+  b.textContent = `${label}: ${pct}%`;
+  b.addEventListener("click", () => { document.getElementById("cws_pct").value = pct; renderCWS(); });
+  cwsPctPicks.appendChild(b);
+});
+
+function renderCWS() {
+  const occ = parseFloat(document.getElementById("cws_occ").value) || 0;
+  const rate = parseFloat(document.getElementById("cws_rate").value) || 0;
+  const pct = (parseFloat(document.getElementById("cws_pct").value) || 0) / 100;
+  const manual = document.getElementById("cws_manual").value;
+
+  const dailyDemand = occ * rate;
+  const avgHourly = dailyDemand / 24;
+  const storageRequired = dailyDemand * pct;
+
+  const qualifying = STANDARD_TANK_SIZES.filter(t => t >= storageRequired).sort((a, b) => a - b);
+  let autoTank = qualifying.length ? qualifying[0] : `Exceeds Std. Range (largest: ${Math.max(...STANDARD_TANK_SIZES)} L) - Use Multiple Tanks`;
+  const selectedTank = manual !== "" ? parseFloat(manual) : autoTank;
+
+  let turnover = "-";
+  if (avgHourly > 0 && typeof selectedTank === "number") turnover = round(selectedTank / avgHourly, 1);
+  const compliant = typeof turnover === "number" && turnover <= 24;
+
+  document.getElementById("cws_daily").textContent = fmt(dailyDemand, "L", 0);
+  document.getElementById("cws_avghr").textContent = fmt(avgHourly, "L/hr", 1);
+  document.getElementById("cws_req").textContent = fmt(storageRequired, "L", 0);
+  document.getElementById("cws_tank").textContent = typeof selectedTank === "number" ? fmt(selectedTank, "L", 0) : selectedTank;
+  document.getElementById("cws_turnover").textContent = typeof turnover === "number" ? fmt(turnover, "hrs", 1) : turnover;
+  document.getElementById("cws_compliant").innerHTML = badge(compliant, "PASS", "REVIEW - turnover > 24hr");
+  document.getElementById("cws_verdict").innerHTML = compliant
+    ? `<span class="badge pass">OK</span> Tank turns over roughly every ${turnover} hrs on average.`
+    : `<span class="badge fail">REVIEW</span> Turnover exceeds the 24hr Legionella/stagnation guideline - consider a smaller tank or higher-turnover design.`;
+}
+["cws_occ", "cws_rate", "cws_pct", "cws_manual"].forEach(id => document.getElementById(id).addEventListener("input", renderCWS));
+
+// =====================================================================
+// Hot Water Storage
+// =====================================================================
+const hwsRatePicks = document.getElementById("hws_rate_picks");
+HOT_WATER_DEMAND_RATE_REFERENCE.forEach(([label, litres]) => {
+  const b = document.createElement("button");
+  b.textContent = `${label}: ${litres} L`;
+  b.addEventListener("click", () => { document.getElementById("hws_rate").value = litres; renderHWS(); });
+  hwsRatePicks.appendChild(b);
+});
+
+function renderHWS() {
+  const occ = parseFloat(document.getElementById("hws_occ").value) || 0;
+  const rate = parseFloat(document.getElementById("hws_rate").value) || 0;
+  const frac = (parseFloat(document.getElementById("hws_frac").value) || 0) / 100;
+  const period = parseFloat(document.getElementById("hws_period").value) || 0;
+  const storeT = parseFloat(document.getElementById("hws_storet").value) || 0;
+  const feedT = parseFloat(document.getElementById("hws_feedt").value) || 0;
+  const manual = document.getElementById("hws_manual").value;
+
+  const dailyDemand = occ * rate;
+  const peakDemand = dailyDemand * frac;
+  const storageRequired = HOT_WATER_STRATIFICATION_FACTOR ? peakDemand / HOT_WATER_STRATIFICATION_FACTOR : peakDemand;
+  const selectedStorage = manual !== "" ? parseFloat(manual) : storageRequired;
+
+  const deltaT = Math.max(storeT - feedT, 0.0);
+  let requiredReheat = 0.0;
+  if (period > 0 && typeof selectedStorage === "number") {
+    requiredReheat = (selectedStorage * HOT_WATER_SPECIFIC_HEAT_KJ_PER_KGK * deltaT) / (3600 * period);
+  }
+  const usableSelected = selectedStorage * HOT_WATER_STRATIFICATION_FACTOR;
+  const coversPeak = usableSelected >= peakDemand;
+  const legionella = storeT >= 60.0;
+
+  document.getElementById("hws_daily").textContent = fmt(dailyDemand, "L", 0);
+  document.getElementById("hws_peak").textContent = fmt(peakDemand, "L", 0);
+  document.getElementById("hws_req").textContent = fmt(storageRequired, "L", 0);
+  document.getElementById("hws_sel").textContent = fmt(selectedStorage, "L", 0);
+  document.getElementById("hws_dt").textContent = fmt(deltaT, "K", 1);
+  document.getElementById("hws_kw").textContent = fmt(requiredReheat, "kW", 2);
+  document.getElementById("hws_legionella").innerHTML = badge(legionella, "PASS ≥ 60°C", "FAIL < 60°C");
+  document.getElementById("hws_peakcheck").innerHTML = badge(coversPeak, "PASS", "REVIEW - undersized for peak period");
+  document.getElementById("hws_verdict").innerHTML = (legionella && coversPeak)
+    ? `<span class="badge pass">OK</span> Meets both the 60°C Legionella minimum and the peak-period demand.`
+    : `<span class="badge fail">REVIEW</span> ${!legionella ? "Storage temp below 60°C. " : ""}${!coversPeak ? "Selected storage doesn't cover peak-period demand." : ""}`;
+}
+["hws_occ","hws_rate","hws_frac","hws_period","hws_storet","hws_feedt","hws_manual"].forEach(id => document.getElementById(id).addEventListener("input", renderHWS));
+
+// =====================================================================
+// Pipe / Duct Sizing
+// =====================================================================
+function renderPipeSizing() {
+  const flow = parseFloat(document.getElementById("pipe_flow").value) || 0;
+  const material = document.getElementById("pipe_material").value;
+  const temp = parseFloat(document.getElementById("pipe_temp").value) || 10;
+  const target = parseFloat(document.getElementById("pipe_target").value) || 300;
+
+  const [nominal, result] = selectPipeSize(flow, temp, material, target);
+  if (nominal === null) {
+    document.getElementById("pipe_size").textContent = "No size meets target (flow too high)";
+    ["pipe_vel","pipe_re","pipe_lambda","pipe_dp"].forEach(id => document.getElementById(id).textContent = "-");
+    return;
+  }
+  document.getElementById("pipe_size").textContent = nominal + " mm";
+  document.getElementById("pipe_vel").textContent = fmt(result.velocity_ms, "m/s", 2);
+  document.getElementById("pipe_re").textContent = result.reynolds_number.toLocaleString();
+  document.getElementById("pipe_lambda").textContent = result.friction_factor;
+  document.getElementById("pipe_dp").textContent = fmt(result.pressure_drop_pa_per_m, "Pa/m", 1);
+}
+["pipe_flow","pipe_material","pipe_temp","pipe_target"].forEach(id => document.getElementById(id).addEventListener("input", renderPipeSizing));
+
+function renderDuctSizing() {
+  const flow = parseFloat(document.getElementById("duct_flow").value) || 0;
+  const target = parseFloat(document.getElementById("duct_target").value) || 1.0;
+  const [raw, selected] = selectDuctSize(flow, target);
+  document.getElementById("duct_raw").textContent = fmt(raw, "mm", 0);
+  document.getElementById("duct_size").textContent = typeof selected === "number" ? selected + " mm" : selected;
+}
+["duct_flow","duct_target"].forEach(id => document.getElementById(id).addEventListener("input", renderDuctSizing));
+
+// =====================================================================
+// Condensation - Pipe
+// =====================================================================
+function rebuildPipeSizeOptions() {
+  const material = document.getElementById("cpipe_material").value;
+  const sel = document.getElementById("cpipe_size");
+  sel.innerHTML = "";
+  if (material === "Copper") {
+    Object.keys(COPPER_PIPE_SIZES_MM).map(Number).sort((a,b)=>a-b).forEach(nominal => {
+      const opt = document.createElement("option");
+      opt.value = nominal; opt.textContent = nominal + "mm";
+      sel.appendChild(opt);
+    });
+  } else {
+    Object.keys(STEEL_PIPE_OD_MM).map(Number).sort((a,b)=>a-b).forEach(nominal => {
+      const od = STEEL_PIPE_OD_MM[nominal];
+      const opt = document.createElement("option");
+      opt.value = od; opt.textContent = `${nominal}mm (OD ${od}mm)`;
+      sel.appendChild(opt);
+    });
+  }
+}
+document.getElementById("cpipe_material").addEventListener("change", () => { rebuildPipeSizeOptions(); renderCondPipe(); });
+
+function renderCondPipe() {
+  const fluid = parseFloat(document.getElementById("cpipe_fluid").value) || 0;
+  const amb = parseFloat(document.getElementById("cpipe_amb").value) || 0;
+  const rh = parseFloat(document.getElementById("cpipe_rh").value) || 0;
+  const od = parseFloat(document.getElementById("cpipe_size").value) || 0;
+  const thick = parseFloat(document.getElementById("cpipe_thick").value) || 0;
+  const k = parseFloat(document.getElementById("cpipe_k").value) || DEFAULT_PIPE_INSULATION_K_W_MK;
+  const film = parseFloat(document.getElementById("cpipe_jacket").value) || 10.0;
+
+  const r = calculatePipeCondensationRisk(fluid, amb, rh, od, thick, k, film);
+  renderCondResult("cpipe", r, thick);
+}
+["cpipe_fluid","cpipe_amb","cpipe_rh","cpipe_size","cpipe_thick","cpipe_k","cpipe_jacket"].forEach(id => document.getElementById(id).addEventListener("input", renderCondPipe));
+
+// =====================================================================
+// Condensation - Duct
+// =====================================================================
+function renderCondDuct() {
+  const air = parseFloat(document.getElementById("cduct_air").value) || 0;
+  const amb = parseFloat(document.getElementById("cduct_amb").value) || 0;
+  const rh = parseFloat(document.getElementById("cduct_rh").value) || 0;
+  const thick = parseFloat(document.getElementById("cduct_thick").value) || 0;
+  const k = parseFloat(document.getElementById("cduct_k").value) || DEFAULT_DUCT_INSULATION_K_W_MK;
+  const film = parseFloat(document.getElementById("cduct_jacket").value) || 10.0;
+
+  const r = calculateDuctCondensationRisk(air, amb, rh, thick, k, film);
+  renderCondResult("cduct", r, thick);
+}
+["cduct_air","cduct_amb","cduct_rh","cduct_thick","cduct_k","cduct_jacket"].forEach(id => document.getElementById(id).addEventListener("input", renderCondDuct));
+
+function renderCondResult(prefix, r, currentThickness) {
+  document.getElementById(prefix + "_surf").textContent = fmt(r.surface_temp_c, "°C", 2);
+  document.getElementById(prefix + "_dew").textContent = fmt(r.dew_point_c, "°C", 2);
+  document.getElementById(prefix + "_margin").textContent = fmt(r.margin_c, "°C", 2);
+
+  let reqLine;
+  if (r.required_insulation_thickness_mm === null) reqLine = "Not achievable within 200mm - review ambient condition/fluid temp";
+  else if (r.required_insulation_thickness_mm <= currentThickness) reqLine = `${r.required_insulation_thickness_mm} mm (current thickness already covers this)`;
+  else reqLine = `${r.required_insulation_thickness_mm} mm`;
+  document.getElementById(prefix + "_req").textContent = reqLine;
+
+  let verdict;
+  if (r.condensation_risk) verdict = `<span class="badge fail">CONDENSATION RISK</span> Surface is at or below the dew point.`;
+  else if (r.margin_c < 2.0) verdict = `<span class="badge warn">MARGINAL</span> Only ${r.margin_c}°C above dew point.`;
+  else verdict = `<span class="badge pass">OK</span> ${r.margin_c}°C above dew point.`;
+  document.getElementById(prefix + "_verdict").innerHTML = verdict;
+}
+
+// =====================================================================
+// Condensation - Room Surface
+// =====================================================================
+function renderCondRoom() {
+  const intT = parseFloat(document.getElementById("croom_int").value) || 0;
+  const intRh = parseFloat(document.getElementById("croom_rh").value) || 0;
+  const extT = parseFloat(document.getElementById("croom_ext").value) || 0;
+  const u = parseFloat(document.getElementById("croom_u").value) || 0;
+
+  const r = calculateRoomSurfaceCondensation(intT, intRh, extT, u);
+  document.getElementById("croom_tsi").textContent = fmt(r.t_si_c, "°C", 2);
+  document.getElementById("croom_dew").textContent = fmt(r.dew_point_c, "°C", 2);
+  document.getElementById("croom_frsi").textContent = r.f_rsi;
+  document.getElementById("croom_margin").textContent = fmt(r.margin_c, "°C", 2);
+  document.getElementById("croom_mould").innerHTML = badge(!r.mould_risk, "OK", "MOULD RISK");
+
+  let verdict;
+  if (r.condensation_risk) verdict = `<span class="badge fail">CONDENSATION RISK</span> Surface is at or below the dew point.`;
+  else if (r.mould_risk) verdict = `<span class="badge warn">MOULD RISK</span> f<sub>Rsi</sub> below 0.75 even though not yet at dew point.`;
+  else verdict = `<span class="badge pass">OK</span> ${r.margin_c}°C above dew point, f<sub>Rsi</sub> ${r.f_rsi}.`;
+  document.getElementById("croom_verdict").innerHTML = verdict;
+}
+["croom_int","croom_rh","croom_ext","croom_u"].forEach(id => document.getElementById(id).addEventListener("input", renderCondRoom));
+
+// =====================================================================
+// Initial render
+// =====================================================================
+rebuildPipeSizeOptions();
+renderCWS();
+renderHWS();
+renderPipeSizing();
+renderDuctSizing();
+renderCondPipe();
+renderCondDuct();
+renderCondRoom();
+</script>
+
+</body>
+</html>
