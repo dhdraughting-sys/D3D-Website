@@ -426,6 +426,7 @@ footer a { color: var(--accent); }
         <h2>Result</h2>
         <div class="resrow"><span class="k">Calculated Diameter (raw)</span><span class="v" id="duct_raw"></span></div>
         <div class="resrow"><span class="k">Selected Standard Size</span><span class="v" id="duct_size"></span></div>
+        <div class="resrow"><span class="k">Velocity (at selected size)</span><span class="v" id="duct_vel"></span></div>
       </div>
     </div>
   </div>
@@ -719,13 +720,20 @@ function selectPipeSize(flowLs, tempC, material, targetPaPerM) {
   return [null, null];
 }
 function selectDuctSize(requiredAirflowLs, targetFrictionPam) {
-  if (requiredAirflowLs <= 0) return [0.0, STANDARD_DUCT_SIZES[0]];
+  if (requiredAirflowLs <= 0) return [0.0, STANDARD_DUCT_SIZES[0], 0.0];
   const diameterMm = Math.pow(
     (0.020 * 1.2 * 8 * Math.pow(requiredAirflowLs / 1000, 2)) / (Math.pow(Math.PI, 2) * targetFrictionPam),
     1 / 5
   ) * 1000;
   const selected = STANDARD_DUCT_SIZES.find(s => s >= diameterMm);
-  return [diameterMm, selected !== undefined ? selected : "Exceeds Std. Range"];
+  if (selected === undefined) return [diameterMm, "Exceeds Std. Range", null];
+  // Velocity at the SELECTED standard size (not the raw solved diameter)
+  // - the size that would actually be installed, once rounded up to the
+  // nearest standard circular duct, is what the real air velocity (and
+  // therefore noise) in the duct depends on.
+  const areaM2 = Math.PI * Math.pow(selected / 1000 / 2, 2);
+  const velocityMs = areaM2 > 0 ? (requiredAirflowLs / 1000) / areaM2 : 0.0;
+  return [diameterMm, selected, velocityMs];
 }
 // ---- Pipe insulation condensation (radial/cylindrical) ----
 function pipeInsulationSurfaceTemperatureC(fluidTempC, ambientTempC, pipeOdMm, insulationThicknessMm, insulationKWMk, filmCoeff = 10.0) {
@@ -959,9 +967,10 @@ function renderPipeSizing() {
 function renderDuctSizing() {
   const flow = parseFloat(document.getElementById("duct_flow").value) || 0;
   const target = parseFloat(document.getElementById("duct_target").value) || 1.0;
-  const [raw, selected] = selectDuctSize(flow, target);
+  const [raw, selected, velocity] = selectDuctSize(flow, target);
   document.getElementById("duct_raw").textContent = fmt(raw, "mm", 0);
   document.getElementById("duct_size").textContent = typeof selected === "number" ? selected + " mm" : selected;
+  document.getElementById("duct_vel").textContent = velocity !== null ? fmt(velocity, "m/s", 2) : "-";
 }
 ["duct_flow","duct_target"].forEach(id => document.getElementById(id).addEventListener("input", renderDuctSizing));
 
