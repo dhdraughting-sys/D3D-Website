@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Weather Lookup | Free Interactive Tool | D3D Design & Drafting Services</title>
+<meta name="description" content="Search any town or city for current weather conditions and a 3-day forecast — a free interactive tool from D3D Design & Drafting Services, handy for planning site visits and surveys.">
+<style>
+  :root{
+    --ink:#161b22; --steel-dark:#2b3440; --steel:#5a6b7d; --steel-light:#8fa1b3;
+    --silver:#c9d2da; --paper:#f5f7f9; --white:#ffffff; --accent:#c0392b; --accent-2:#1f3a4d;
+    --radius:10px; --maxw:1120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;color:var(--ink);background:var(--white);line-height:1.6;}
+  img{max-width:100%;display:block;}
+  a{color:inherit;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+
+  header.site-nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.96);border-bottom:1px solid #e3e7eb;backdrop-filter:blur(6px);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;max-width:var(--maxw);margin:0 auto;}
+  .nav-logo{display:flex;align-items:center;gap:10px;}
+  .nav-logo img{height:42px;width:auto;}
+  nav.links{display:flex;gap:28px;font-size:15px;font-weight:600;}
+  nav.links a{text-decoration:none;color:var(--steel-dark);transition:color .15s;padding-bottom:4px;border-bottom:2px solid transparent;}
+  nav.links a:hover{color:var(--accent-2);}
+  nav.links a.active{color:var(--accent-2);border-bottom-color:var(--accent-2);}
+  .nav-cta{background:var(--accent-2);color:#fff;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;}
+
+  .hero{background:linear-gradient(180deg,#eef1f4 0%,#f5f7f9 60%,#ffffff 100%);padding:64px 0 60px;border-bottom:1px solid #e3e7eb;}
+  .hero-inner{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:center;}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);background:#e4ecf1;padding:6px 12px;border-radius:20px;margin-bottom:18px;}
+  h1{font-size:2.6rem;line-height:1.15;color:var(--ink);margin-bottom:18px;font-weight:800;}
+  h1 span{color:var(--accent-2);}
+  .hero p.lead{font-size:1.15rem;color:var(--steel);max-width:52ch;margin-bottom:28px;}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:13px 26px;border-radius:6px;font-weight:700;text-decoration:none;font-size:15px;transition:transform .15s, box-shadow .15s;border:none;cursor:pointer;}
+  .btn-primary{background:var(--accent-2);color:#fff;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(31,58,77,.28);}
+  .btn-secondary{background:#fff;color:var(--accent-2);border:1.5px solid var(--accent-2);}
+  .btn-secondary:hover{transform:translateY(-2px);}
+  .hero-logo-card{background:#fff;border-radius:var(--radius);padding:28px;box-shadow:0 12px 40px rgba(22,27,34,.10);border:1px solid #e9ecef;text-align:center;}
+  .hero-logo-card img{width:100%;height:auto;}
+  .hero-logo-card .tagline{margin-top:14px;font-size:13px;letter-spacing:.06em;color:var(--steel);text-transform:uppercase;font-weight:700;}
+
+  .page-hero{background:linear-gradient(135deg,#1f3a4d,#2b4a63);color:#fff;padding:56px 0;}
+  .page-hero .eyebrow{background:rgba(255,255,255,.15);color:#fff;}
+  .page-hero h1{color:#fff;font-size:2.2rem;margin-bottom:12px;}
+  .page-hero p{color:#c9d7e0;font-size:1.05rem;max-width:60ch;}
+
+  .stage-strip{background:var(--accent-2);color:#fff;padding:18px 0;}
+  .stage-strip .wrap{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:14px;font-weight:600;text-align:center;}
+  .stage-strip .stage-pill{background:rgba(255,255,255,.12);padding:6px 14px;border-radius:20px;}
+  .stage-strip .arrow{opacity:.55;}
+
+  section{padding:72px 0;}
+  .section-head{max-width:640px;margin:0 auto 44px;text-align:center;}
+  .section-head .eyebrow{margin-bottom:14px;}
+  .section-head h2{font-size:2rem;color:var(--ink);margin-bottom:14px;font-weight:800;}
+  .section-head p{color:var(--steel);font-size:1.05rem;}
+
+  .services{background:var(--paper);}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .card{background:#fff;border:1px solid #e6e9ec;border-radius:var(--radius);padding:26px 24px;transition:box-shadow .15s, transform .15s;}
+  .card:hover{box-shadow:0 10px 30px rgba(22,27,34,.08);transform:translateY(-3px);}
+  .card .num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#e4ecf1;color:var(--accent-2);font-weight:800;font-size:14px;margin-bottom:14px;}
+  .card h3{font-size:1.08rem;margin-bottom:8px;color:var(--ink);}
+  .card p{font-size:.95rem;color:var(--steel);}
+
+  .workflow{background:#fff;}
+  .workflow-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:56px;}
+  .step{position:relative;padding:22px 16px;background:var(--paper);border-radius:var(--radius);border:1px solid #e6e9ec;}
+  .step .step-no{font-size:12px;font-weight:800;color:#fff;background:var(--accent-2);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .step h4{font-size:.95rem;margin-bottom:6px;color:var(--ink);}
+  .step p{font-size:.85rem;color:var(--steel);}
+
+  .apps{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .app-card{border-radius:var(--radius);padding:30px;color:#fff;}
+  .app-card.primary{background:linear-gradient(135deg,#1f3a4d,#2b4a63);}
+  .app-card.secondary{background:linear-gradient(135deg,#2b3440,#3d4a5a);}
+  .app-card .app-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.15);padding:5px 10px;border-radius:14px;margin-bottom:14px;}
+  .app-card h3{font-size:1.3rem;margin-bottom:10px;}
+  .app-card p{font-size:.95rem;color:#dbe3ea;margin-bottom:16px;}
+  .app-card ul{list-style:none;font-size:.88rem;color:#dbe3ea;}
+  .app-card ul li{padding-left:20px;position:relative;margin-bottom:7px;}
+  .app-card ul li::before{content:"\2713";position:absolute;left:0;color:#8fd0b0;font-weight:800;}
+
+  .why{background:var(--paper);}
+  .why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;}
+  .why-grid .stat h3{font-size:2.1rem;color:var(--accent-2);font-weight:800;margin-bottom:6px;}
+  .why-grid .stat p{font-size:.9rem;color:var(--steel);}
+
+  .teaser-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .teaser-card{background:#fff;border:1px solid #e6e9ec;border-radius:var(--radius);padding:28px 24px;display:flex;flex-direction:column;}
+  .teaser-card h3{font-size:1.15rem;margin-bottom:10px;color:var(--ink);}
+  .teaser-card p{font-size:.95rem;color:var(--steel);margin-bottom:18px;flex:1;}
+  .teaser-card a{font-size:.9rem;font-weight:700;color:var(--accent-2);text-decoration:none;}
+  .teaser-card a:hover{text-decoration:underline;}
+
+  .contact{background:var(--accent-2);color:#fff;}
+  .contact .section-head h2{color:#fff;}
+  .contact .section-head p{color:#c9d7e0;}
+  .contact-card{max-width:560px;margin:0 auto;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:var(--radius);padding:34px;text-align:center;}
+  .placeholder-badge{display:inline-block;background:#c0392b;color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:14px;margin-bottom:18px;}
+  .notice-box{background:#FBF0DD;border:1px solid #E8CE9A;color:#6B5011;font-size:.92rem;line-height:1.6;padding:16px 20px;border-radius:10px;max-width:760px;margin:0 auto 40px;}
+  .tools-cta{max-width:760px;margin:0 auto;text-align:center;background:var(--paper);border:1px solid #e6e9ec;border-radius:var(--radius);padding:40px;}
+  .tools-cta h3{font-size:1.3rem;margin-bottom:10px;}
+  .tools-cta p{color:var(--steel);margin-bottom:22px;}
+  .contact-rows{display:flex;flex-direction:column;gap:14px;margin:20px 0 26px;text-align:left;}
+  .contact-row{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.05);padding:14px 16px;border-radius:8px;}
+  .contact-row .icon{font-size:18px;}
+  .contact-row .label{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#a9c0cf;font-weight:700;}
+  .contact-row .val{font-size:15px;font-weight:600;}
+  .contact .btn-primary{background:#fff;color:var(--accent-2);}
+  .contact .btn-primary:hover{box-shadow:0 6px 16px rgba(0,0,0,.25);}
+  .contact-cta-banner{background:var(--paper);}
+  .contact-cta-banner .cta-box{max-width:760px;margin:0 auto;text-align:center;background:#fff;border:1px solid #e6e9ec;border-radius:var(--radius);padding:40px;}
+  .contact-cta-banner h2{font-size:1.6rem;margin-bottom:12px;}
+  .contact-cta-banner p{color:var(--steel);margin-bottom:22px;}
+
+  footer{background:var(--ink);color:#9aa5b1;padding:32px 0;font-size:13px;}
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .footer-inner .brand{color:#fff;font-weight:700;}
+  .footer-links{display:flex;gap:18px;}
+  .footer-links a{text-decoration:none;color:#9aa5b1;}
+  .footer-links a:hover{color:#fff;}
+
+  #d3d-chat-launcher{position:fixed;bottom:22px;right:22px;z-index:200;width:60px;height:60px;border-radius:50%;background:var(--accent-2);color:#fff;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(22,27,34,.28);font-size:26px;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+  #d3d-chat-launcher:hover{transform:scale(1.06);}
+  #d3d-chat-launcher .close-ic{display:none;}
+  #d3d-chat-launcher.open .chat-ic{display:none;}
+  #d3d-chat-launcher.open .close-ic{display:block;}
+  #d3d-chat-badge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 6px;}
+  #d3d-chat-panel{position:fixed;bottom:94px;right:22px;z-index:200;width:340px;max-width:calc(100vw - 32px);background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(22,27,34,.30);border:1px solid #e3e7eb;display:none;flex-direction:column;height:500px;max-height:calc(100vh - 140px);}
+  #d3d-chat-panel.open{display:flex;}
+  .chat-head{background:var(--accent-2);color:#fff;padding:16px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .chat-head .dot{width:9px;height:9px;border-radius:50%;background:#4ade80;flex-shrink:0;}
+  .chat-head .titles{line-height:1.25;}
+  .chat-head .titles .t1{font-weight:800;font-size:14px;}
+  .chat-head .titles .t2{font-size:11px;color:#c9d7e0;}
+  .chat-body{flex:1;overflow-y:auto;padding:16px;background:var(--paper);display:flex;flex-direction:column;gap:10px;}
+  .chat-msg{max-width:85%;padding:10px 13px;border-radius:12px;font-size:13.5px;line-height:1.45;}
+  .chat-msg.bot{background:#fff;border:1px solid #e3e7eb;color:var(--ink);align-self:flex-start;border-bottom-left-radius:3px;}
+  .chat-msg.user{background:var(--accent-2);color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+  .chat-quick{display:flex;flex-wrap:wrap;gap:7px;align-self:flex-start;max-width:100%;}
+  .chat-quick button{background:#fff;border:1.3px solid var(--accent-2);color:var(--accent-2);font-size:12px;font-weight:700;padding:7px 11px;border-radius:16px;cursor:pointer;transition:background .15s, color .15s;}
+  .chat-quick button:hover{background:var(--accent-2);color:#fff;}
+  .chat-live-cta{border-top:1px solid #e3e7eb;padding:10px 14px;background:#fff;flex-shrink:0;}
+  .chat-live-cta button{width:100%;background:#c0392b;color:#fff;border:none;border-radius:20px;padding:10px;font-weight:700;font-size:13px;cursor:pointer;}
+  .chat-live-cta button:hover{background:#a73226;}
+  .chat-foot{border-top:1px solid #e3e7eb;padding:10px;display:flex;gap:8px;background:#fff;flex-shrink:0;}
+  .chat-foot input{flex:1;border:1px solid #dde2e6;border-radius:20px;padding:9px 14px;font-size:13px;outline:none;}
+  .chat-foot input:focus{border-color:var(--accent-2);}
+  .chat-foot button{background:var(--accent-2);color:#fff;border:none;border-radius:20px;padding:0 16px;font-weight:700;font-size:13px;cursor:pointer;}
+  .chat-disclaimer{font-size:10px;color:var(--steel);text-align:center;padding:6px 10px 0;background:#fff;}
+
+  @media(max-width:900px){
+    .hero-inner{grid-template-columns:1fr;}
+    .hero-logo-card{order:-1;max-width:420px;margin:0 auto;}
+    .cards{grid-template-columns:1fr 1fr;}
+    .workflow-grid{grid-template-columns:repeat(2,1fr);}
+    .apps{grid-template-columns:1fr;}
+    .why-grid{grid-template-columns:1fr 1fr;}
+    .teaser-grid{grid-template-columns:1fr;}
+    nav.links{display:none;}
+  }
+  @media(max-width:560px){
+    h1{font-size:2rem;}
+    .cards{grid-template-columns:1fr;}
+    .workflow-grid{grid-template-columns:1fr;}
+    .why-grid{grid-template-columns:1fr 1fr;}
+    .nav-cta{display:none;}
+    #d3d-chat-panel{right:16px;left:16px;width:auto;bottom:88px;}
+    #d3d-chat-launcher{right:16px;bottom:16px;}
+  }
+
+  .weather-search-card{background:#fff;border:1px solid #e6e9ec;border-radius:var(--radius);padding:26px;box-shadow:0 2px 10px rgba(22,27,34,.06);margin-bottom:26px;}
+  .search-row{display:flex;gap:10px;}
+  .search-row input{flex:1;padding:13px 16px;font-size:1rem;border:1px solid #dde2e6;border-radius:6px;outline:none;}
+  .search-row input:focus{border-color:var(--accent-2);}
+  .search-row button{background:var(--accent-2);color:#fff;border:none;border-radius:6px;padding:0 26px;font-size:.95rem;font-weight:700;cursor:pointer;}
+  .search-row button:hover{background:#152a38;}
+  .wstatus{margin-top:12px;font-size:.9rem;color:var(--steel);min-height:1.2em;}
+  .wstatus.err{color:var(--accent);}
+  .quicktowns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .quicktowns button{font-size:.8rem;padding:6px 12px;border-radius:14px;border:1px solid #dde2e6;background:var(--paper);color:var(--ink);cursor:pointer;}
+  .quicktowns button:hover{border-color:var(--accent-2);color:var(--accent-2);}
+  .wresult{display:none;}
+  .current-card{background:linear-gradient(135deg,var(--accent-2),#152a38);color:#fff;border-radius:var(--radius);padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px;}
+  .current-loc{font-size:1.15rem;font-weight:700;}
+  .current-loc .sub{font-size:.82rem;font-weight:400;opacity:.75;margin-top:2px;}
+  .current-temp{display:flex;align-items:center;gap:10px;}
+  .current-temp img{width:56px;height:56px;}
+  .current-temp .t{font-size:2.6rem;font-weight:800;}
+  .current-meta{display:flex;gap:20px;margin-top:16px;width:100%;font-size:.85rem;opacity:.9;flex-wrap:wrap;}
+  .wforecast{display:flex;gap:12px;flex-wrap:wrap;}
+  .fday{flex:1;min-width:130px;background:#fff;border:1px solid #e6e9ec;border-radius:var(--radius);padding:16px;text-align:center;}
+  .fday .date{font-size:.78rem;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.04em;}
+  .fday img{width:44px;height:44px;margin:6px auto;}
+  .fday .cond{font-size:.82rem;color:var(--ink);min-height:2.2em;}
+  .fday .temps{font-size:.92rem;font-weight:700;margin-top:4px;}
+  .fday .temps .lo{color:var(--steel);font-weight:400;}
+  .fday .rain{font-size:.76rem;color:var(--accent-2);margin-top:4px;}
+  .wattribution{margin-top:18px;font-size:.75rem;color:var(--steel);text-align:center;}
+  @media(max-width:560px){
+    .search-row{flex-direction:column;}
+    .search-row button{padding:12px;}
+  }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "D3D Design & Drafting Services",
+  "description": "Mechanical, ventilation and plumbing (MEP) building services design and drafting.",
+  "areaServed": [
+    {"@type": "City", "name": "Meriden"},
+    {"@type": "AdministrativeArea", "name": "Warwickshire"},
+    {"@type": "City", "name": "Coventry"},
+    {"@type": "City", "name": "Solihull"},
+    {"@type": "City", "name": "Birmingham"},
+    {"@type": "AdministrativeArea", "name": "West Midlands"}
+  ],
+  "knowsAbout": ["Mechanical services design", "Ventilation design", "Plumbing design", "Building services drafting"]
+}
+</script>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="data:image/jpeg;base64,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" alt="D3D Design & Drafting Services logo">
+    </a>
+    <nav class="links">
+      <a href="index.html">Home</a><a href="services.html">Services</a><a href="capability.html">Capability</a><a href="tools.html" class="active">Tools</a><a href="contact.html">Contact</a>
+    </nav>
+    <a href="contact.html" class="nav-cta">Get in Touch</a>
+  </div>
+</header>
+
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">Free Tools</span>
+    <h1>Live Weather Lookup</h1>
+    <p>Search any town or city for current conditions and a 3-day forecast &mdash; handy for planning site visits, surveys and installs.</p>
+  </div>
+</section>
+
+
+<section id="weather" style="padding-top:56px;">
+  <div class="wrap">
+    <div class="notice-box">
+      <strong>Please note:</strong> forecasts are indicative and sourced from a third-party weather service &mdash; always check conditions again closer to the time for anything safety-critical.
+    </div>
+
+    <div class="weather-search-card">
+      <div class="search-row">
+        <input type="text" id="citySearch" placeholder="Search a town or city&hellip;" autocomplete="off">
+        <button id="searchBtn">Search</button>
+      </div>
+      <div class="quicktowns">
+        <button data-city="Meriden">Meriden</button>
+        <button data-city="Coventry">Coventry</button>
+        <button data-city="Birmingham">Birmingham</button>
+        <button data-city="Solihull">Solihull</button>
+      </div>
+      <div class="wstatus" id="wStatus"></div>
+    </div>
+
+    <div class="wresult" id="wResult">
+      <div class="current-card">
+        <div class="current-loc">
+          <div id="wLocName">&mdash;</div>
+          <div class="sub" id="wLocSub"></div>
+        </div>
+        <div class="current-temp">
+          <img id="wCurIcon" src="" alt="">
+          <div>
+            <div class="t" id="wCurTemp">&mdash;</div>
+            <div id="wCurCond" style="font-size:.85rem;opacity:.85;"></div>
+          </div>
+        </div>
+        <div class="current-meta">
+          <span id="wCurFeels"></span>
+          <span id="wCurHumidity"></span>
+          <span id="wCurWind"></span>
+        </div>
+      </div>
+      <div class="wforecast" id="wForecast"></div>
+      <div class="wattribution">Weather data by <a href="https://www.weatherapi.com/" target="_blank" rel="noopener">WeatherAPI.com</a></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="tools-cta">
+      <h3>Back to the full MEP Quick Calcs toolkit</h3>
+      <p>Cold/hot water storage, pipe &amp; duct sizing, condensation checks, and CIBSE TM52 overheating assessment.</p>
+      <a href="tools.html" class="btn btn-primary">View All Tools</a>
+    </div>
+  </div>
+</section>
+
+
+<script>
+// =====================================================================
+// WeatherAPI.com free tier -- current + 3-day forecast, commercial use
+// permitted, no cost. Sign up free at weatherapi.com to get a key.
+// Attribution link above is required by their free-tier terms.
+// =====================================================================
+(function(){
+  var WEATHER_API_KEY = "YOUR_WEATHERAPI_KEY_HERE";
+
+  var cityInput = document.getElementById('citySearch');
+  var searchBtn = document.getElementById('searchBtn');
+  var statusEl = document.getElementById('wStatus');
+  var resultEl = document.getElementById('wResult');
+
+  function iconUrl(path) {
+    return path.indexOf('//') === 0 ? 'https:' + path : path;
+  }
+
+  function lookupCity(city) {
+    if (!city || !city.trim()) return;
+    statusEl.className = 'wstatus';
+    statusEl.textContent = 'Searching\u2026';
+    resultEl.style.display = 'none';
+
+    if (!WEATHER_API_KEY || WEATHER_API_KEY === 'YOUR_WEATHERAPI_KEY_HERE') {
+      statusEl.className = 'wstatus err';
+      statusEl.textContent = 'Demo not yet live \u2014 add a free WeatherAPI.com key to activate this.';
+      return;
+    }
+
+    var url = 'https://api.weatherapi.com/v1/forecast.json?key=' + encodeURIComponent(WEATHER_API_KEY) + '&q=' + encodeURIComponent(city) + '&days=3&aqi=no&alerts=no';
+    fetch(url).then(function(res){ return res.json(); }).then(function(data){
+      if (data.error) {
+        statusEl.className = 'wstatus err';
+        statusEl.textContent = data.error.message || 'City not found \u2014 try a different search.';
+        return;
+      }
+      renderWeather(data);
+      statusEl.textContent = '';
+    }).catch(function(){
+      statusEl.className = 'wstatus err';
+      statusEl.textContent = 'Could not reach the weather service \u2014 please try again.';
+    });
+  }
+
+  function renderWeather(data) {
+    var loc = data.location, cur = data.current;
+    document.getElementById('wLocName').textContent = loc.name + ', ' + loc.country;
+    document.getElementById('wLocSub').textContent = loc.region ? loc.region : '';
+    document.getElementById('wCurIcon').src = iconUrl(cur.condition.icon);
+    document.getElementById('wCurIcon').alt = cur.condition.text;
+    document.getElementById('wCurTemp').textContent = Math.round(cur.temp_c) + '\u00b0C';
+    document.getElementById('wCurCond').textContent = cur.condition.text;
+    document.getElementById('wCurFeels').textContent = 'Feels like ' + Math.round(cur.feelslike_c) + '\u00b0C';
+    document.getElementById('wCurHumidity').textContent = 'Humidity ' + cur.humidity + '%';
+    document.getElementById('wCurWind').textContent = 'Wind ' + Math.round(cur.wind_kph) + ' km/h';
+
+    var forecastEl = document.getElementById('wForecast');
+    forecastEl.innerHTML = '';
+    data.forecast.forecastday.forEach(function(fd, i){
+      var dateLabel = i === 0 ? 'Today' : new Date(fd.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      var card = document.createElement('div');
+      card.className = 'fday';
+      card.innerHTML = '<div class="date">' + dateLabel + '</div>' +
+        '<img src="' + iconUrl(fd.day.condition.icon) + '" alt="' + fd.day.condition.text + '">' +
+        '<div class="cond">' + fd.day.condition.text + '</div>' +
+        '<div class="temps">' + Math.round(fd.day.maxtemp_c) + '\u00b0 <span class="lo">' + Math.round(fd.day.mintemp_c) + '\u00b0</span></div>' +
+        '<div class="rain">\u2614 ' + fd.day.daily_chance_of_rain + '%</div>';
+      forecastEl.appendChild(card);
+    });
+    resultEl.style.display = 'block';
+  }
+
+  searchBtn.addEventListener('click', function(){ lookupCity(cityInput.value); });
+  cityInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') lookupCity(cityInput.value); });
+  document.querySelectorAll('.quicktowns button').forEach(function(btn){
+    btn.addEventListener('click', function(){ cityInput.value = btn.dataset.city; lookupCity(btn.dataset.city); });
+  });
+})();
+</script>
+
+<section class="contact-cta-banner">
+  <div class="wrap">
+    <div class="cta-box">
+      <h2>Need the full picture on a real project?</h2>
+      <p>These quick calcs are a starting point &mdash; get in touch for a full, coordinated design.</p>
+      <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap footer-inner">
+    <div><span class="brand">D3D</span> &mdash; Design &amp; Drafting Services</div>
+    <div class="footer-links">
+      <a href="services.html">Services</a>
+      <a href="capability.html">Capability</a>
+      <a href="tools.html">Tools</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div>&copy; <span class="year"></span> D3D. All rights reserved.</div>
+  </div>
+</footer>
+
+
+<button id="d3d-chat-launcher" aria-label="Open chat">
+  <span class="chat-ic">💬</span>
+  <span class="close-ic">✕</span>
+  <span id="d3d-chat-badge">?</span>
+</button>
+
+<div id="d3d-chat-panel">
+  <div class="chat-head">
+    <span class="dot"></span>
+    <div class="titles">
+      <div class="t1">D3D Assistant</div>
+      <div class="t2">Quick answers, or message us directly</div>
+    </div>
+  </div>
+  <div class="chat-body" id="d3d-chat-body"></div>
+  <div class="chat-live-cta">
+    <button id="d3d-live-chat-btn">💬 Talk to a real person</button>
+  </div>
+  <div class="chat-foot">
+    <input type="text" id="d3d-chat-input" placeholder="Ask a question&hellip;" autocomplete="off">
+    <button id="d3d-chat-send">Send</button>
+  </div>
+  <div class="chat-disclaimer">Quick-answers are automated. "Talk to a real person" reaches us directly.</div>
+</div>
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+Tawk_API.onLoad = function(){
+  // Our own chat launcher already sits bottom-right; keep Tawk's default
+  // bubble hidden and only bring it up via the "Talk to a real person" button.
+  if (typeof Tawk_API.hideWidget === 'function') { Tawk_API.hideWidget(); }
+};
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/6a6e763c055f021d4ace18f9/default';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+<script>
+(function(){
+  var y = document.querySelectorAll('.year');
+  for (var i=0;i<y.length;i++){ y[i].textContent = new Date().getFullYear(); }
+
+  var KB = [
+    { topic: "Services", keys: ["service","offer","what do you do","scope"],
+      a: "We cover the full building services / MEP scope: heating & cooling (LTHW/CHW), ventilation & air systems, water services, above ground drainage, electrical load & distribution, and coordinated drawings, schedules & BOM." },
+    { topic: "Design process", keys: ["process","how do you work","workflow","pdf","architect"],
+      a: "We take a project from an architect's PDF or DWG straight into our own software: import & calibrate, populate & link, auto-size, schedule & take-off, then export & issue — all from one live model, so drawings and schedules always match." },
+    { topic: "Our software", keys: ["software","app","platform","dynamic design","design platform","tool"],
+      a: "We build our own tools: MEP Design Platform (our production design engine — sizing, drawing markup, schedules & BOM) and MEP Dynamic Design (hour-by-hour dynamic thermal simulation using real weather data)." },
+    { topic: "Estimating support", keys: ["estimat","cost","budget","quantity","quantities","qs","procurement","price"],
+      a: "Because schedules and BOM come straight off the coordinated model, your estimating team can get reliable quantities early — often from Stage 2/3 concept coordination — for faster, more accurate budget pricing, with fewer re-measures." },
+    { topic: "RIBA stages", keys: ["stage","riba"],
+      a: "We cover RIBA Stage 2 (Concept Design) through Stage 4 (Technical Design). Final installation-level detail — exact fittings and full trade coordination — typically sits with the appointed contractor's detailed design at construction stage." },
+    { topic: "Free tools", keys: ["tool","calculator","calc","free"],
+      a: "We've put a free MEP Quick Calcs tool on the site — cold water storage, hot water storage, pipe/duct sizing, condensation checks, a summer overheating quick check and now a more advanced TM52 overheating assessment using real hourly weather data. Check the Tools page in the menu. Indicative/screening figures only, not a substitute for a full design check." },
+  ];
+  var FALLBACK = "I don't have a set answer for that yet — tap “Talk to a real person” below and we'll get back to you directly.";
+
+  var launcher = document.getElementById('d3d-chat-launcher');
+  var panel = document.getElementById('d3d-chat-panel');
+  var body = document.getElementById('d3d-chat-body');
+  var input = document.getElementById('d3d-chat-input');
+  var sendBtn = document.getElementById('d3d-chat-send');
+  var badge = document.getElementById('d3d-chat-badge');
+  var liveBtn = document.getElementById('d3d-live-chat-btn');
+  var opened = false;
+
+  function addMsg(text, sender){
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + sender;
+    div.textContent = text;
+    body.appendChild(div);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function showQuickReplies(){
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-quick';
+    KB.forEach(function(item){
+      var btn = document.createElement('button');
+      btn.textContent = item.topic;
+      btn.addEventListener('click', function(){ handleTopic(item); });
+      wrap.appendChild(btn);
+    });
+    body.appendChild(wrap);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function handleTopic(item){
+    addMsg(item.topic, 'user');
+    setTimeout(function(){ addMsg(item.a, 'bot'); showQuickReplies(); }, 250);
+  }
+
+  function handleFreeText(text){
+    var lower = text.toLowerCase();
+    var match = null;
+    for (var i=0;i<KB.length;i++){
+      for (var j=0;j<KB[i].keys.length;j++){
+        if (lower.indexOf(KB[i].keys[j]) !== -1){ match = KB[i]; break; }
+      }
+      if (match) break;
+    }
+    setTimeout(function(){ addMsg(match ? match.a : FALLBACK, 'bot'); showQuickReplies(); }, 250);
+  }
+
+  function toggle(){
+    opened = !opened;
+    panel.classList.toggle('open', opened);
+    launcher.classList.toggle('open', opened);
+    if (opened) {
+      badge.style.display = 'none';
+      if (!body.dataset.greeted) {
+        addMsg("Hi! I'm the D3D assistant. Ask me a quick question, or tap \u201cTalk to a real person\u201d to message the team directly.", 'bot');
+        showQuickReplies();
+        body.dataset.greeted = '1';
+      }
+    }
+  }
+
+  launcher.addEventListener('click', toggle);
+
+  sendBtn.addEventListener('click', function(){
+    var val = input.value.trim();
+    if (!val) return;
+    addMsg(val, 'user');
+    input.value = '';
+    handleFreeText(val);
+  });
+  input.addEventListener('keydown', function(e){ if (e.key === 'Enter') sendBtn.click(); });
+
+  liveBtn.addEventListener('click', function(){
+    if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+      if (typeof window.Tawk_API.showWidget === 'function') { window.Tawk_API.showWidget(); }
+      window.Tawk_API.maximize();
+    } else {
+      window.location.href = 'contact.html';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
