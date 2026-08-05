@@ -262,10 +262,10 @@
         <button id="searchBtn">Search</button>
       </div>
       <div class="quicktowns">
-        <button data-city="Meriden">Meriden</button>
-        <button data-city="Coventry">Coventry</button>
-        <button data-city="Birmingham">Birmingham</button>
-        <button data-city="Solihull">Solihull</button>
+        <button data-city="Meriden" data-query="52.427,-1.660">Meriden</button>
+        <button data-city="Coventry" data-query="52.406,-1.512">Coventry</button>
+        <button data-city="Birmingham" data-query="52.480,-1.903">Birmingham</button>
+        <button data-city="Solihull" data-query="52.414,-1.781">Solihull</button>
       </div>
       <div class="wstatus" id="wStatus"></div>
     </div>
@@ -324,6 +324,23 @@
     return path.indexOf('//') === 0 ? 'https:' + path : path;
   }
 
+  // Quick-picks pass exact lat,lon coordinates (set below) so they always hit the
+  // right place. Free-text searches are biased towards the UK, since a bare town
+  // name like "Meriden" or "Birmingham" also matches a same-named US town and
+  // WeatherAPI's free-text search doesn't otherwise know which country we mean.
+  function isCoordQuery(q) {
+    return /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(q.trim());
+  }
+  function buildQuery(raw) {
+    var q = raw.trim();
+    if (isCoordQuery(q)) return q;
+    // A comma means the searcher already qualified it themselves (e.g. "Paris, France"
+    // or "Leamington Spa, UK") — leave it alone. Otherwise bias plain town names
+    // towards the UK, since names like "Birmingham" or "Meriden" also match US towns.
+    if (q.indexOf(',') !== -1) return q;
+    return q + ', UK';
+  }
+
   function lookupCity(city) {
     if (!city || !city.trim()) return;
     statusEl.className = 'wstatus';
@@ -336,7 +353,7 @@
       return;
     }
 
-    var url = 'https://api.weatherapi.com/v1/forecast.json?key=' + encodeURIComponent(WEATHER_API_KEY) + '&q=' + encodeURIComponent(city) + '&days=3&aqi=no&alerts=no';
+    var url = 'https://api.weatherapi.com/v1/forecast.json?key=' + encodeURIComponent(WEATHER_API_KEY) + '&q=' + encodeURIComponent(buildQuery(city)) + '&days=3&aqi=no&alerts=no';
     fetch(url).then(function(res){ return res.json(); }).then(function(data){
       if (data.error) {
         statusEl.className = 'wstatus err';
@@ -382,7 +399,10 @@
   searchBtn.addEventListener('click', function(){ lookupCity(cityInput.value); });
   cityInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') lookupCity(cityInput.value); });
   document.querySelectorAll('.quicktowns button').forEach(function(btn){
-    btn.addEventListener('click', function(){ cityInput.value = btn.dataset.city; lookupCity(btn.dataset.city); });
+    btn.addEventListener('click', function(){
+      cityInput.value = btn.dataset.city;
+      lookupCity(btn.dataset.query || btn.dataset.city);
+    });
   });
 })();
 </script>

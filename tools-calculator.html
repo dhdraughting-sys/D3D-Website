@@ -1886,12 +1886,27 @@ tm52LoadPreset();
 // =====================================================================
 // PWA: register service worker so this page can be installed to a
 // phone's home screen and keeps working offline once loaded once.
+//
+// sw.js calls skipWaiting()/clients.claim() so a new version takes over
+// as soon as it's installed, instead of waiting for every open tab to
+// close. The one thing that still needs doing on our end is reloading
+// the page once that handover happens — otherwise the tab is left
+// running on old JS until someone manually hard-refreshes. The
+// controllerchange listener below does that reload automatically, so a
+// normal visit picks up updates with no hard reset needed.
 // =====================================================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js').catch(function(err) {
       console.warn('Service worker registration failed:', err);
     });
+  });
+
+  var swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (swRefreshing) return;
+    swRefreshing = true;
+    window.location.reload();
   });
 }
 
