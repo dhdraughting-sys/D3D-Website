@@ -246,6 +246,7 @@ footer a { color: var(--accent); }
   <button class="tab-btn" data-tab="hws">Hot Water Storage</button>
   <button class="tab-btn" data-tab="pds">Pipe / Duct Sizing</button>
   <button class="tab-btn" data-tab="cond">Condensation</button>
+  <button class="tab-btn" data-tab="ovh">Summer Overheating</button>
 </nav>
 
 <main>
@@ -588,6 +589,131 @@ footer a { color: var(--accent); }
         <div class="resrow"><span class="k">Margin</span><span class="v" id="croom_margin"></span></div>
         <div class="resrow"><span class="k">Mould risk (f<sub>Rsi</sub> &lt; 0.75, BS 5250 dwellings)</span><span class="v" id="croom_mould"></span></div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= SUMMER OVERHEATING ============================= -->
+<section class="panel" id="panel-ovh">
+  <div class="card">
+    <h2>Summer Overheating Quick Check</h2>
+    <p class="note">Indicative screening only, in the spirit of CIBSE TM59 / Part O &ndash; a weighted risk score from glazing exposure, fabric, ventilation and gains, calibrated against representative UK regional summer conditions. This does not model hourly weather, thermal mass or transient effects &ndash; it is not a dynamic simulation and not a substitute for a full TM59 assessment.</p>
+
+    <div class="field">
+      <label>Location</label>
+      <select id="ovh_location">
+        <option value="1.00">South East England (incl. London)</option>
+        <option value="0.90">South West England</option>
+        <option value="0.94">Midlands</option>
+        <option value="0.83">North West England</option>
+        <option value="0.81">North East England &amp; Yorkshire</option>
+        <option value="0.76">Wales</option>
+        <option value="0.74">Scotland</option>
+        <option value="0.72">Northern Ireland</option>
+      </select>
+      <span class="hint">Sets a typical regional summer solar exposure factor, relative to the sunniest UK region. Indicative &ndash; use project-specific data if available.</span>
+    </div>
+
+    <div class="field">
+      <label>Room type</label>
+      <select id="ovh_roomtype">
+        <option value="bedroom">Bedroom (overnight comfort &ndash; stricter limit)</option>
+        <option value="living">Living room / other habitable room</option>
+      </select>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Floor Area (m&sup2;)</label>
+        <input type="number" id="ovh_floor" value="14" min="1" step="0.5">
+      </div>
+      <div class="field">
+        <label>Window Area (m&sup2;)</label>
+        <input type="number" id="ovh_window" value="2.5" min="0" step="0.1">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Predominant Orientation</label>
+        <select id="ovh_orient">
+          <option value="1.0">South</option>
+          <option value="0.85">South-East / South-West</option>
+          <option value="0.65">East / West</option>
+          <option value="0.3">North</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Glazing (g-value)</label>
+        <select id="ovh_glazing">
+          <option value="0.85">Single glazing</option>
+          <option value="0.76" selected>Standard double glazing</option>
+          <option value="0.40">Double glazing, solar control</option>
+          <option value="0.50">Triple glazing</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Shading</label>
+        <select id="ovh_shading">
+          <option value="0">None</option>
+          <option value="0.2">Some (overhang, blinds)</option>
+          <option value="0.4">Good external shading</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Top floor (exposed roof above)?</label>
+        <select id="ovh_topfloor">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>External Wall U-value (W/m&sup2;K)</label>
+      <select id="ovh_wallu">
+        <option value="2.1">Solid wall, uninsulated (pre-1920)</option>
+        <option value="1.5">Cavity wall, uninsulated</option>
+        <option value="0.45" selected>Cavity wall, insulated (post-1990s)</option>
+        <option value="0.25">New build / recently retrofitted</option>
+      </select>
+      <span class="hint">Heavier, uninsulated fabric buffers peaks and loses heat faster overnight; well-insulated, low-mass construction tends to retain gains &ndash; a recognised TM59 risk factor, not an oversight.</span>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Ventilation strategy</label>
+        <select id="ovh_vent">
+          <option value="4">Openable windows, good cross-flow</option>
+          <option value="2.5" selected>Openable windows, limited flow</option>
+          <option value="1.2">Trickle vents only / restricted opening</option>
+          <option value="2">MVHR (filtered mechanical ventilation)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Internal gains (people + electronics)</label>
+        <select id="ovh_gains">
+          <option value="120">Low</option>
+          <option value="200" selected>Typical</option>
+          <option value="320">High</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="card">
+      <h2>Result</h2>
+      <div id="ovh_verdict" class="verdict"></div>
+      <div class="resrow"><span class="k">Glazing &amp; solar exposure</span><span class="v" id="ovh_glazingpts"></span></div>
+      <div class="resrow"><span class="k">Fabric &amp; roof</span><span class="v" id="ovh_fabricpts"></span></div>
+      <div class="resrow"><span class="k">Ventilation (mitigating)</span><span class="v" id="ovh_ventpts"></span></div>
+      <div class="resrow"><span class="k">Internal gains</span><span class="v" id="ovh_gainspts"></span></div>
+      <div class="resrow"><span class="k">Total indicative risk score</span><span class="v" id="ovh_total"></span></div>
+      <div class="resrow"><span class="k">Risk band</span><span class="v" id="ovh_band"></span></div>
     </div>
   </div>
 </section>
@@ -1071,6 +1197,76 @@ function renderCondRoom() {
 ["croom_int","croom_rh","croom_ext","croom_u"].forEach(id => document.getElementById(id).addEventListener("input", renderCondRoom));
 
 // =====================================================================
+// Summer Overheating Quick Check
+// =====================================================================
+// Deliberately a calibrated points-based risk score, NOT a first-principles
+// heat balance. A naive steady-state W-in/W-out calculation is extremely
+// sensitive to assumptions and can produce wildly unrealistic "predicted
+// temperatures" without properly modelling thermal mass and transient
+// effects (that's what full TM59 dynamic simulation is for) — a points
+// score is more honest about what a quick check can actually tell you.
+const OVH_VENT_POINTS = { "4": -2.0, "2.5": -0.5, "1.2": 1.5, "2": -1.0 };
+
+function renderOvh() {
+  const locationFactor = parseFloat(document.getElementById("ovh_location").value);
+  const roomType = document.getElementById("ovh_roomtype").value;
+  const floorArea = parseFloat(document.getElementById("ovh_floor").value) || 1;
+  const windowArea = parseFloat(document.getElementById("ovh_window").value) || 0;
+  const orientationFactor = parseFloat(document.getElementById("ovh_orient").value);
+  const gValue = parseFloat(document.getElementById("ovh_glazing").value);
+  const shadingReduction = parseFloat(document.getElementById("ovh_shading").value);
+  const wallU = parseFloat(document.getElementById("ovh_wallu").value);
+  const topFloor = document.getElementById("ovh_topfloor").value === "yes";
+  const ventChoice = document.getElementById("ovh_vent").value;
+  const gains = parseFloat(document.getElementById("ovh_gains").value);
+
+  // Glazing & solar exposure — glazing-to-floor ratio, orientation, glass
+  // solar transmission (g-value), shading and regional sun.
+  const glazingRatio = windowArea / floorArea;
+  const exposureFactor = glazingRatio * orientationFactor * gValue * (1 - shadingReduction) * locationFactor;
+  const glazingPoints = exposureFactor * 15;
+
+  // Fabric & roof
+  let fabricPoints = 0;
+  if (wallU <= 0.30) fabricPoints += 0.6;
+  else if (wallU <= 0.45) fabricPoints += 0.3;
+  else if (wallU <= 1.5) fabricPoints += 0;
+  else fabricPoints -= 0.5;
+  if (topFloor) fabricPoints += 1.0;
+
+  // Ventilation — negative because good ventilation MITIGATES risk
+  const ventPoints = OVH_VENT_POINTS[ventChoice] ?? 0;
+
+  // Internal gains
+  const gainsPoints = gains <= 150 ? 0 : gains <= 250 ? 0.3 : 0.8;
+
+  const totalScore = Math.max(glazingPoints + fabricPoints + ventPoints + gainsPoints, 0);
+  const displayScore = Math.min(totalScore, 10);
+
+  // Bedrooms use a stricter threshold — overnight comfort is less forgiving
+  const thresholds = roomType === "bedroom" ? [1.5, 3.5] : [2, 4.5];
+  let risk, riskLevel;
+  if (totalScore < thresholds[0]) { risk = "LOW"; riskLevel = "pass"; }
+  else if (totalScore < thresholds[1]) { risk = "MEDIUM"; riskLevel = "warn"; }
+  else { risk = "HIGH"; riskLevel = "fail"; }
+
+  const signed = v => (v >= 0 ? "+" : "") + v.toFixed(1);
+  document.getElementById("ovh_glazingpts").textContent = signed(glazingPoints);
+  document.getElementById("ovh_fabricpts").textContent = signed(fabricPoints);
+  document.getElementById("ovh_ventpts").textContent = signed(ventPoints);
+  document.getElementById("ovh_gainspts").textContent = signed(gainsPoints);
+  document.getElementById("ovh_total").textContent = displayScore.toFixed(1) + " / 10";
+  document.getElementById("ovh_band").innerHTML = `<span class="badge ${riskLevel}">${risk}</span>`;
+
+  let verdict;
+  if (risk === "LOW") verdict = `<span class="badge pass">LOW</span> No major red flags from this simplified check &ndash; still worth a full assessment for anything going to Building Control.`;
+  else if (risk === "MEDIUM") verdict = `<span class="badge warn">MEDIUM</span> Some risk factors present &ndash; review shading, ventilation and glazing before committing to the design.`;
+  else verdict = `<span class="badge fail">HIGH</span> Multiple risk factors stacking up &ndash; recommend a full TM59-based assessment before committing to the design, particularly for Part O submissions.`;
+  document.getElementById("ovh_verdict").innerHTML = verdict;
+}
+["ovh_location","ovh_roomtype","ovh_floor","ovh_window","ovh_orient","ovh_glazing","ovh_shading","ovh_wallu","ovh_topfloor","ovh_vent","ovh_gains"].forEach(id => document.getElementById(id).addEventListener("input", renderOvh));
+
+// =====================================================================
 // Initial render
 // =====================================================================
 rebuildPipeSizeOptions();
@@ -1081,6 +1277,7 @@ renderDuctSizing();
 renderCondPipe();
 renderCondDuct();
 renderCondRoom();
+renderOvh();
 
 // =====================================================================
 // PWA: register service worker so this page can be installed to a
