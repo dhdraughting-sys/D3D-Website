@@ -1604,11 +1604,11 @@ const TM52Engine = (function () {
       const trm = trmByDay[key];
       if (trm === undefined) return;
       const tmax = 0.33 * trm + 18.8 + 3;
-      const tupp = tmax + 2;
+      const tupp = tmax + 4;
       const diff = r.top - tmax;
       if (diff >= 1) exceed1KCount++;
       if (r.top > tupp) neverExceedUpp = false;
-      if (r.top > tmax) { dailyWe[key] = (dailyWe[key] || 0) + Math.round(diff); }
+      if (r.top > tmax) { dailyWe[key] = (dailyWe[key] || 0) + diff; }
       else if (!(key in dailyWe)) { dailyWe[key] = 0; }
     });
     const totalOccupied = assessed.length;
@@ -1723,7 +1723,7 @@ function renderTM52() {
   const peak = assessedTops.length ? Math.max(...assessedTops) : NaN;
 
   document.getElementById('tm52_c1').innerHTML = badge(result.criterion1.pass, 'PASS', 'FAIL') + ' ' + result.criterion1.pctExceed.toFixed(1) + '%';
-  document.getElementById('tm52_c2').innerHTML = badge(result.criterion2.pass, 'PASS', 'FAIL') + ' max ' + result.criterion2.maxDailyWe;
+  document.getElementById('tm52_c2').innerHTML = badge(result.criterion2.pass, 'PASS', 'FAIL') + ' max ' + result.criterion2.maxDailyWe.toFixed(1);
   document.getElementById('tm52_c3').innerHTML = badge(result.criterion3.pass, 'PASS', 'FAIL');
   document.getElementById('tm52_peak').textContent = fmt(peak, '°C', 1);
   document.getElementById('tm52_overall').innerHTML = badge(result.overallPass, 'PASS', 'FAIL');
