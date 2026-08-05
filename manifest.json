@@ -1,7 +1,7 @@
 {
   "name": "MEP Quick Calcs — D3D Design & Drafting",
   "short_name": "MEP Calcs",
-  "description": "Standalone MEP quick-check calculator — cold/hot water storage, pipe & duct sizing, condensation risk, and summer overheating risk. Ported from the same formulas as MEP Design Platform.",
+  "description": "Standalone MEP quick-check calculator — cold/hot water storage, pipe & duct sizing, condensation risk, summer overheating risk, and an advanced CIBSE TM52 overheating assessment using real hourly weather data. Ported from the same formulas as MEP Design Platform.",
   "start_url": "/tools-calculator.html",
   "scope": "/",
   "display": "standalone",

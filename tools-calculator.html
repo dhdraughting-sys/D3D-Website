@@ -212,6 +212,9 @@ main { padding: 12px; max-width: 720px; margin: 0 auto 60px; }
   margin-bottom: 8px;
   line-height: 1.5;
 }
+.status { font-size: 11.5px; margin-top: 6px; }
+.status.ok { color: var(--green); }
+.status.err { color: var(--red); }
 footer {
   text-align: center;
   font-size: 10.5px;
@@ -268,6 +271,7 @@ footer a { color: var(--accent); }
   <button class="tab-btn" data-tab="pds">Pipe / Duct Sizing</button>
   <button class="tab-btn" data-tab="cond">Condensation</button>
   <button class="tab-btn" data-tab="ovh">Summer Overheating</button>
+  <button class="tab-btn" data-tab="tm52">TM52 (Advanced)</button>
 </nav>
 
 <main>
@@ -735,6 +739,139 @@ footer a { color: var(--accent); }
       <div class="resrow"><span class="k">Internal gains</span><span class="v" id="ovh_gainspts"></span></div>
       <div class="resrow"><span class="k">Total indicative risk score</span><span class="v" id="ovh_total"></span></div>
       <div class="resrow"><span class="k">Risk band</span><span class="v" id="ovh_band"></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-tm52">
+  <div class="card">
+    <h2>TM52 Overheating Assessment (Commercial &ndash; Advanced)</h2>
+    <p class="note">Uses the real CIBSE TM52 adaptive-comfort formulas (running mean outdoor temperature, the three exceedance criteria) applied to actual hourly weather data via a simplified single-zone thermal model. This is a screening-grade engineering tool, not a validated dynamic simulation &ndash; it does not replace IES-VE / DesignBuilder / TAS for a real Part O or planning submission, and unless you upload a licensed CIBSE DSY file, the weather data is an illustrative representative profile, not official DSY data.</p>
+
+    <div class="field">
+      <label>Weather data source</label>
+      <select id="tm52_wxsource">
+        <option value="upload">Upload my own EPW file (recommended for real projects)</option>
+        <option value="preset" selected>Representative UK region profile (illustrative, not a licensed DSY)</option>
+      </select>
+    </div>
+
+    <div class="field" id="tm52_uploadfield" style="display:none;">
+      <label>EPW file</label>
+      <input type="file" id="tm52_epwfile" accept=".epw,.txt">
+      <span class="hint">A full annual (8760-hour) EnergyPlus Weather (.epw) file &ndash; e.g. your licensed CIBSE DSY1 file, or a TMY-style file for early-stage screening.</span>
+      <div id="tm52_wxstatus" class="status"></div>
+    </div>
+
+    <div class="field" id="tm52_presetfield">
+      <label>Region</label>
+      <select id="tm52_region">
+        <option value="0" data-factor="1.00" data-lat="51.5" data-lon="-0.12">South East England (incl. London)</option>
+        <option value="1" data-factor="0.90" data-lat="50.7" data-lon="-3.5">South West England</option>
+        <option value="2" data-factor="0.94" data-lat="52.5" data-lon="-1.9">Midlands</option>
+        <option value="3" data-factor="0.83" data-lat="53.5" data-lon="-2.4">North West England</option>
+        <option value="4" data-factor="0.81" data-lat="53.8" data-lon="-1.5">North East England &amp; Yorkshire</option>
+        <option value="5" data-factor="0.76" data-lat="52.1" data-lon="-3.8">Wales</option>
+        <option value="6" data-factor="0.74" data-lat="56.5" data-lon="-4.2">Scotland</option>
+        <option value="7" data-factor="0.72" data-lat="54.6" data-lon="-5.9">Northern Ireland</option>
+      </select>
+      <span class="hint">Generates an illustrative representative summer profile scaled for the region &ndash; for a real compliance submission, upload a licensed CIBSE DSY EPW file instead.</span>
+      <div id="tm52_presetstatus" class="status"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Room / space</h2>
+    <div class="row2">
+      <div class="field"><label>Floor Area (m&sup2;)</label><input type="number" id="tm52_floor" value="20" min="1" step="0.5"></div>
+      <div class="field"><label>Room Height (m)</label><input type="number" id="tm52_height" value="2.7" min="2" step="0.1"></div>
+    </div>
+    <div class="field">
+      <label>Construction / thermal mass</label>
+      <select id="tm52_mass">
+        <option value="light">Lightweight (timber frame, dry-lined)</option>
+        <option value="medium" selected>Medium (masonry cavity)</option>
+        <option value="heavy">Heavyweight (exposed concrete/masonry)</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>External Wall Area (m&sup2;)</label><input type="number" id="tm52_wallarea" value="15" min="0" step="0.5"></div>
+      <div class="field"><label>Wall U-value (W/m&sup2;K)</label><input type="number" id="tm52_wallu" value="0.3" min="0.1" step="0.05"></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Top floor (exposed roof above)?</label>
+        <select id="tm52_topfloor"><option value="no">No</option><option value="yes">Yes</option></select>
+      </div>
+      <div class="field"><label>Roof U-value (W/m&sup2;K)</label><input type="number" id="tm52_roofu" value="0.18" min="0.05" step="0.05"></div>
+    </div>
+    <div class="field">
+      <label>Ventilation rate (ACH)</label>
+      <input type="number" id="tm52_ach" value="4" min="0.3" step="0.1">
+      <div class="quickpick">
+        <button type="button" data-set="tm52_ach" data-val="1.5">Trickle only (1.5)</button>
+        <button type="button" data-set="tm52_ach" data-val="2.5">Restricted opening (2.5)</button>
+        <button type="button" data-set="tm52_ach" data-val="4">Good cross-flow (4)</button>
+        <button type="button" data-set="tm52_ach" data-val="8">High / assisted (8)</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Internal gains (W, occupied)</label><input type="number" id="tm52_gains" value="300" min="0" step="10"></div>
+      <div class="field">
+        <label>Occupied days</label>
+        <select id="tm52_days"><option value="weekdays" selected>Weekdays (Mon&ndash;Fri)</option><option value="everyday">Every day</option></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Occupied from (hour, 24h)</label><input type="number" id="tm52_starthour" value="8" min="0" max="23" step="1"></div>
+      <div class="field"><label>Occupied to (hour, 24h)</label><input type="number" id="tm52_endhour" value="18" min="1" max="24" step="1"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Windows</h2>
+    <div class="row2">
+      <div class="field"><label>Window 1 orientation</label>
+        <select id="tm52_w1orient"><option>N</option><option>NE</option><option>E</option><option>SE</option><option selected>S</option><option>SW</option><option>W</option><option>NW</option></select>
+      </div>
+      <div class="field"><label>Window 1 area (m&sup2;)</label><input type="number" id="tm52_w1area" value="4" min="0" step="0.1"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Glazing g-value</label>
+        <select id="tm52_w1g"><option value="0.85">Single glazing</option><option value="0.76" selected>Standard double</option><option value="0.40">Double, solar control</option><option value="0.50">Triple glazing</option></select>
+      </div>
+      <div class="field"><label>Shading</label>
+        <select id="tm52_w1shade"><option value="0">None</option><option value="0.2" selected>Some (overhang, blinds)</option><option value="0.4">Good external shading</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Window U-value (W/m&sup2;K)</label><input type="number" id="tm52_w1u" value="1.4" min="0.5" step="0.1"></div>
+
+    <div class="row2">
+      <div class="field"><label>Window 2 orientation (optional, 0 area = none)</label>
+        <select id="tm52_w2orient"><option>N</option><option>NE</option><option>E</option><option>SE</option><option>S</option><option>SW</option><option selected>W</option><option>NW</option></select>
+      </div>
+      <div class="field"><label>Window 2 area (m&sup2;)</label><input type="number" id="tm52_w2area" value="0" min="0" step="0.1"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Glazing g-value</label>
+        <select id="tm52_w2g"><option value="0.85">Single glazing</option><option value="0.76" selected>Standard double</option><option value="0.40">Double, solar control</option><option value="0.50">Triple glazing</option></select>
+      </div>
+      <div class="field"><label>Shading</label>
+        <select id="tm52_w2shade"><option value="0">None</option><option value="0.2" selected>Some (overhang, blinds)</option><option value="0.4">Good external shading</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Window U-value (W/m&sup2;K)</label><input type="number" id="tm52_w2u" value="1.4" min="0.5" step="0.1"></div>
+  </div>
+
+  <div class="results">
+    <div class="card">
+      <h2>Result</h2>
+      <div id="tm52_verdict" class="verdict">Upload an EPW file or select a region profile to see results.</div>
+      <div class="resrow"><span class="k">Criterion 1 &ndash; Hours of Exceedance (&le;3%)</span><span class="v" id="tm52_c1"></span></div>
+      <div class="resrow"><span class="k">Criterion 2 &ndash; Daily Weighted Exceedance (&le;6)</span><span class="v" id="tm52_c2"></span></div>
+      <div class="resrow"><span class="k">Criterion 3 &ndash; Upper Limit (never exceeded)</span><span class="v" id="tm52_c3"></span></div>
+      <div class="resrow"><span class="k">Peak operative temperature (assessment period)</span><span class="v" id="tm52_peak"></span></div>
+      <div class="resrow"><span class="k">Overall</span><span class="v" id="tm52_overall"></span></div>
     </div>
   </div>
 </section>
@@ -1288,6 +1425,336 @@ function renderOvh() {
 ["ovh_location","ovh_roomtype","ovh_floor","ovh_window","ovh_orient","ovh_glazing","ovh_shading","ovh_wallu","ovh_topfloor","ovh_vent","ovh_gains"].forEach(id => document.getElementById(id).addEventListener("input", renderOvh));
 
 // =====================================================================
+// TM52 Overheating Assessment (Advanced) — real CIBSE TM52 formulas
+// (running mean outdoor temp, the 3 exceedance criteria) run against
+// actual hourly weather data via a simplified single-zone thermal model.
+//
+// HONESTY NOTE: this is a screening-grade engine, not a validated
+// dynamic simulation tool (not IES-VE/DesignBuilder/TAS-equivalent).
+// It uses a simplified isotropic-sky solar model and a single thermal
+// capacitance node (Top approximated as Tin). Built-in region profiles
+// are illustrative representative summer profiles, NOT licensed CIBSE
+// DSY weather files — for a real compliance submission, upload a
+// licensed EPW/DSY file via the upload option.
+// =====================================================================
+const TM52Engine = (function () {
+  function parseEPW(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.length > 0);
+    if (lines.length < 9) throw new Error('File is too short to be a valid EPW file.');
+    const locLine = lines[0].split(',');
+    if (locLine[0].trim().toUpperCase() !== 'LOCATION') {
+      throw new Error('This does not look like a valid EPW file (missing LOCATION header line).');
+    }
+    const location = {
+      city: locLine[1], country: locLine[3],
+      latitude: parseFloat(locLine[6]), longitude: parseFloat(locLine[7]),
+      timezone: parseFloat(locLine[8]), elevation: parseFloat(locLine[9])
+    };
+    if (!isFinite(location.latitude) || !isFinite(location.longitude)) {
+      throw new Error('Could not read latitude/longitude from the EPW LOCATION line.');
+    }
+    const rows = [];
+    for (let i = 8; i < lines.length; i++) {
+      const cols = lines[i].split(',');
+      if (cols.length < 16) continue;
+      const month = parseInt(cols[1], 10), day = parseInt(cols[2], 10), hour = parseInt(cols[3], 10);
+      const dryBulb = parseFloat(cols[6]);
+      const dni = Math.max(0, parseFloat(cols[14]));
+      const dhi = Math.max(0, parseFloat(cols[15]));
+      const ghi = Math.max(0, parseFloat(cols[13]));
+      if (!isFinite(month) || !isFinite(day) || !isFinite(hour) || !isFinite(dryBulb)) continue;
+      rows.push({ month, day, hour, dryBulb, dni, dhi, ghi });
+    }
+    if (rows.length < 8000) {
+      throw new Error('EPW file parsed but has far fewer than 8760 hourly rows (' + rows.length + ' found) — check the file is a full annual EPW.');
+    }
+    return { location, rows };
+  }
+
+  const DAYS_IN_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
+  function dayOfYear(month, day) { let n = day; for (let m = 0; m < month - 1; m++) n += DAYS_IN_MONTH[m]; return n; }
+  function toRad(d) { return d * Math.PI / 180; }
+  function toDeg(r) { return r * 180 / Math.PI; }
+
+  function solarPosition(month, day, hourEnding, latitude, longitude, timezone) {
+    const N = dayOfYear(month, day);
+    const localTime = hourEnding - 0.5;
+    const decl = toRad(23.45 * Math.sin(toRad(360 / 365 * (284 + N))));
+    const B = toRad(360 / 364 * (N - 81));
+    const eot = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+    const lstm = 15 * timezone;
+    const tc = 4 * (longitude - lstm) + eot;
+    const solarTime = localTime + tc / 60;
+    const hourAngle = toRad(15 * (solarTime - 12));
+    const lat = toRad(latitude);
+    const sinAlt = Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(hourAngle);
+    const alt = toDeg(Math.asin(Math.max(-1, Math.min(1, sinAlt))));
+    let cosAz = (Math.sin(decl) - Math.sin(toRad(alt)) * Math.sin(lat)) / (Math.cos(toRad(alt)) * Math.cos(lat));
+    cosAz = Math.max(-1, Math.min(1, cosAz));
+    let az = toDeg(Math.acos(cosAz));
+    if (hourAngle > 0) az = 360 - az;
+    return { altitude: alt, azimuth: az };
+  }
+
+  const ORIENTATION_DEG = { N: 0, NE: 45, E: 90, SE: 135, S: 180, SW: 225, W: 270, NW: 315 };
+
+  function windowSolarGain(dni, dhi, ghi, altitude, azimuth, orientationDeg, areaM2, gValue, shadingReduction) {
+    if (altitude <= 0 || areaM2 <= 0) return 0;
+    const altRad = toRad(altitude);
+    const surfaceAzRad = toRad(orientationDeg);
+    const sunAzRad = toRad(azimuth);
+    const cosInc = Math.cos(altRad) * Math.cos(sunAzRad - surfaceAzRad);
+    const directOnSurface = cosInc > 0 ? dni * cosInc : 0;
+    const diffuseOnSurface = dhi * 0.5 + ghi * 0.1;
+    const totalIncident = directOnSurface + diffuseOnSurface;
+    return totalIncident * areaM2 * gValue * (1 - shadingReduction);
+  }
+
+  function computeDailyMeans(rows) {
+    const byDay = {}; const order = [];
+    rows.forEach(r => {
+      const key = r.month + '-' + r.day;
+      if (!byDay[key]) { byDay[key] = []; order.push(key); }
+      byDay[key].push(r.dryBulb);
+    });
+    const dailyMean = {};
+    order.forEach(key => { const vals = byDay[key]; dailyMean[key] = vals.reduce((a, b) => a + b, 0) / vals.length; });
+    return { dailyMean, order };
+  }
+
+  function computeRunningMean(dailyMean, order) {
+    const trm = {};
+    const first7 = order.slice(0, 7).map(k => dailyMean[k]);
+    let prevTrm = first7.reduce((a, b) => a + b, 0) / first7.length;
+    order.forEach((key, i) => {
+      if (i === 0) { trm[key] = prevTrm; }
+      else { const prevKey = order[i - 1]; prevTrm = 0.8 * prevTrm + 0.2 * dailyMean[prevKey]; trm[key] = prevTrm; }
+    });
+    return trm;
+  }
+
+  const MASS_CLASS_JM2K = { light: 100000, medium: 250000, heavy: 450000 };
+
+  function runThermalModel(epw, params) {
+    const { location, rows } = epw;
+    const volume = params.floorArea * params.roomHeight;
+    const C = MASS_CLASS_JM2K[params.massClass] * params.floorArea;
+    const Hvent = 0.33 * params.ach * volume;
+    let Hfabric = params.wallU * params.wallArea;
+    if (params.topFloor) Hfabric += params.roofU * params.roofArea;
+    params.windows.forEach(w => { Hfabric += w.uValue * w.area; });
+    const Htotal = Hvent + Hfabric;
+
+    let Tin = rows[0].dryBulb;
+    const out = new Array(rows.length);
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      const pos = solarPosition(r.month, r.day, r.hour, location.latitude, location.longitude, location.timezone);
+      let Qsolar = 0;
+      params.windows.forEach(w => {
+        Qsolar += windowSolarGain(r.dni, r.dhi, r.ghi, pos.altitude, pos.azimuth, ORIENTATION_DEG[w.orientation], w.area, w.gValue, w.shading);
+      });
+      const doy = dayOfYear(r.month, r.day);
+      const weekday = ((doy - 1) % 7) + 1;
+      const isOccupiedDay = params.occupiedDays.indexOf(weekday) !== -1;
+      const isOccupiedHour = r.hour > params.occupiedStartHour && r.hour <= params.occupiedEndHour;
+      const Qgains = (isOccupiedDay && isOccupiedHour) ? params.internalGainsW : 0;
+      const capTerm = C / 3600;
+      Tin = (capTerm * Tin + Htotal * r.dryBulb + Qsolar + Qgains) / (capTerm + Htotal);
+      out[i] = { month: r.month, day: r.day, hour: r.hour, dryBulb: r.dryBulb, top: Tin, occupied: isOccupiedDay && isOccupiedHour };
+    }
+    return out;
+  }
+
+  function evaluateTM52(modelRows, trmByDay, options) {
+    options = options || {};
+    const startMonth = options.startMonth || 5, endMonth = options.endMonth || 9;
+    const assessed = modelRows.filter(r => r.month >= startMonth && r.month <= endMonth && r.occupied);
+    let exceed1KCount = 0, neverExceedUpp = true;
+    const dailyWe = {};
+    assessed.forEach(r => {
+      const key = r.month + '-' + r.day;
+      const trm = trmByDay[key];
+      if (trm === undefined) return;
+      const tmax = 0.33 * trm + 18.8 + 3;
+      const tupp = tmax + 2;
+      const diff = r.top - tmax;
+      if (diff >= 1) exceed1KCount++;
+      if (r.top > tupp) neverExceedUpp = false;
+      if (r.top > tmax) { dailyWe[key] = (dailyWe[key] || 0) + Math.round(diff); }
+      else if (!(key in dailyWe)) { dailyWe[key] = 0; }
+    });
+    const totalOccupied = assessed.length;
+    const pctExceed = totalOccupied > 0 ? (exceed1KCount / totalOccupied) * 100 : 0;
+    const criterion1Pass = pctExceed <= 3;
+    let maxWe = 0, worstDay = null;
+    Object.keys(dailyWe).forEach(key => { if (dailyWe[key] > maxWe) { maxWe = dailyWe[key]; worstDay = key; } });
+    const criterion2Pass = maxWe <= 6;
+    const criterion3Pass = neverExceedUpp;
+    const failCount = [criterion1Pass, criterion2Pass, criterion3Pass].filter(p => !p).length;
+    return {
+      totalOccupiedHours: totalOccupied,
+      criterion1: { pass: criterion1Pass, exceedHours: exceed1KCount, pctExceed },
+      criterion2: { pass: criterion2Pass, maxDailyWe: maxWe, worstDay },
+      criterion3: { pass: criterion3Pass },
+      overallPass: failCount < 2, failCount
+    };
+  }
+
+  return { parseEPW, computeDailyMeans, computeRunningMean, runThermalModel, evaluateTM52 };
+})();
+
+function tm52GenerateRegionProfile(regionFactor, lat, lon) {
+  const rows = [];
+  const daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
+  function doy(m, d) { let n = d; for (let i = 0; i < m - 1; i++) n += daysInMonth[i]; return n; }
+  for (let month = 1; month <= 12; month++) {
+    for (let day = 1; day <= daysInMonth[month - 1]; day++) {
+      const N = doy(month, day);
+      const seasonal = 13.5 + 8.5 * regionFactor * Math.cos((N - 200) / 365 * 2 * Math.PI);
+      for (let hour = 1; hour <= 24; hour++) {
+        const diurnal = 5 * regionFactor * Math.sin((hour - 6) / 24 * 2 * Math.PI);
+        const dryBulb = seasonal + diurnal;
+        let dni = 0, dhi = 0, ghi = 0;
+        const isDaylight = hour >= 6 && hour <= 20;
+        const solarSeason = Math.max(0, Math.cos((N - 172) / 365 * 2 * Math.PI));
+        if (isDaylight) {
+          const shape = Math.max(0, Math.sin((hour - 6) / 14 * Math.PI));
+          dni = 600 * regionFactor * shape * solarSeason;
+          dhi = 150 * regionFactor * shape * solarSeason;
+          ghi = (dni * 0.6 + dhi) * shape;
+        }
+        rows.push({ month, day, hour, dryBulb, dni, dhi, ghi });
+      }
+    }
+  }
+  return { location: { city: 'Representative region profile', latitude: lat, longitude: lon, timezone: 0 }, rows };
+}
+
+let tm52CurrentEPW = null, tm52CurrentTrmData = null;
+
+function tm52ComputeTrmFor(epw) {
+  const { dailyMean, order } = TM52Engine.computeDailyMeans(epw.rows);
+  return { trm: TM52Engine.computeRunningMean(dailyMean, order), order };
+}
+
+function tm52CollectRoomParams() {
+  const days = document.getElementById('tm52_days').value === 'weekdays' ? [1,2,3,4,5] : [1,2,3,4,5,6,7];
+  const windows = [];
+  const w1area = parseFloat(document.getElementById('tm52_w1area').value) || 0;
+  if (w1area > 0) windows.push({
+    orientation: document.getElementById('tm52_w1orient').value, area: w1area,
+    gValue: parseFloat(document.getElementById('tm52_w1g').value),
+    shading: parseFloat(document.getElementById('tm52_w1shade').value),
+    uValue: parseFloat(document.getElementById('tm52_w1u').value)
+  });
+  const w2area = parseFloat(document.getElementById('tm52_w2area').value) || 0;
+  if (w2area > 0) windows.push({
+    orientation: document.getElementById('tm52_w2orient').value, area: w2area,
+    gValue: parseFloat(document.getElementById('tm52_w2g').value),
+    shading: parseFloat(document.getElementById('tm52_w2shade').value),
+    uValue: parseFloat(document.getElementById('tm52_w2u').value)
+  });
+  return {
+    floorArea: parseFloat(document.getElementById('tm52_floor').value) || 1,
+    roomHeight: parseFloat(document.getElementById('tm52_height').value) || 2.4,
+    massClass: document.getElementById('tm52_mass').value,
+    windows,
+    wallArea: parseFloat(document.getElementById('tm52_wallarea').value) || 0,
+    wallU: parseFloat(document.getElementById('tm52_wallu').value) || 0.3,
+    topFloor: document.getElementById('tm52_topfloor').value === 'yes',
+    roofArea: parseFloat(document.getElementById('tm52_floor').value) || 0,
+    roofU: parseFloat(document.getElementById('tm52_roofu').value) || 0.18,
+    ach: parseFloat(document.getElementById('tm52_ach').value) || 1,
+    internalGainsW: parseFloat(document.getElementById('tm52_gains').value) || 0,
+    occupiedDays: days,
+    occupiedStartHour: parseInt(document.getElementById('tm52_starthour').value, 10),
+    occupiedEndHour: parseInt(document.getElementById('tm52_endhour').value, 10)
+  };
+}
+
+function renderTM52() {
+  if (!tm52CurrentEPW || !tm52CurrentTrmData) return;
+  const params = tm52CollectRoomParams();
+  const modelRows = TM52Engine.runThermalModel(tm52CurrentEPW, params);
+  const result = TM52Engine.evaluateTM52(modelRows, tm52CurrentTrmData.trm);
+  const assessedTops = modelRows.filter(r => r.month >= 5 && r.month <= 9 && r.occupied).map(r => r.top);
+  const peak = assessedTops.length ? Math.max(...assessedTops) : NaN;
+
+  document.getElementById('tm52_c1').innerHTML = badge(result.criterion1.pass, 'PASS', 'FAIL') + ' ' + result.criterion1.pctExceed.toFixed(1) + '%';
+  document.getElementById('tm52_c2').innerHTML = badge(result.criterion2.pass, 'PASS', 'FAIL') + ' max ' + result.criterion2.maxDailyWe;
+  document.getElementById('tm52_c3').innerHTML = badge(result.criterion3.pass, 'PASS', 'FAIL');
+  document.getElementById('tm52_peak').textContent = fmt(peak, '°C', 1);
+  document.getElementById('tm52_overall').innerHTML = badge(result.overallPass, 'PASS', 'FAIL');
+
+  let verdict;
+  if (result.overallPass) {
+    verdict = `<span class="badge pass">PASS</span> Meets TM52 (${result.failCount}/3 criteria not met &ndash; a room fails only if 2 or more criteria are breached).`;
+  } else {
+    verdict = `<span class="badge fail">FAIL</span> Does not meet TM52 &ndash; ${result.failCount} of 3 criteria breached. Review glazing/solar exposure, thermal mass, shading or ventilation.`;
+  }
+  document.getElementById('tm52_verdict').innerHTML = verdict;
+}
+
+document.getElementById('tm52_wxsource').addEventListener('change', function() {
+  const isUpload = this.value === 'upload';
+  document.getElementById('tm52_uploadfield').style.display = isUpload ? 'block' : 'none';
+  document.getElementById('tm52_presetfield').style.display = isUpload ? 'none' : 'block';
+  if (!isUpload) tm52LoadPreset();
+});
+
+function tm52LoadPreset() {
+  const sel = document.getElementById('tm52_region');
+  const opt = sel.options[sel.selectedIndex];
+  const factor = parseFloat(opt.dataset.factor), lat = parseFloat(opt.dataset.lat), lon = parseFloat(opt.dataset.lon);
+  tm52CurrentEPW = tm52GenerateRegionProfile(factor, lat, lon);
+  tm52CurrentTrmData = tm52ComputeTrmFor(tm52CurrentEPW);
+  const statusEl = document.getElementById('tm52_presetstatus');
+  statusEl.className = 'status ok';
+  statusEl.textContent = 'Representative profile loaded for ' + opt.textContent + ' (illustrative, not a licensed DSY file).';
+  renderTM52();
+}
+document.getElementById('tm52_region').addEventListener('change', tm52LoadPreset);
+
+document.getElementById('tm52_epwfile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('tm52_wxstatus');
+  statusEl.className = 'status'; statusEl.textContent = 'Reading file...';
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      tm52CurrentEPW = TM52Engine.parseEPW(evt.target.result);
+      tm52CurrentTrmData = tm52ComputeTrmFor(tm52CurrentEPW);
+      statusEl.className = 'status ok';
+      statusEl.textContent = `Loaded ${tm52CurrentEPW.location.city || 'weather file'} (${tm52CurrentEPW.rows.length} hourly rows, lat ${tm52CurrentEPW.location.latitude}).`;
+      renderTM52();
+    } catch (err) {
+      tm52CurrentEPW = null; tm52CurrentTrmData = null;
+      statusEl.className = 'status err';
+      statusEl.textContent = 'Could not read this file: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.querySelectorAll('#panel-tm52 .quickpick button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.set;
+    document.getElementById(targetId).value = btn.dataset.val;
+    document.querySelectorAll(`#panel-tm52 .quickpick button[data-set="${targetId}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTM52();
+  });
+});
+
+['tm52_floor','tm52_height','tm52_mass','tm52_wallarea','tm52_wallu','tm52_topfloor','tm52_roofu',
+ 'tm52_ach','tm52_gains','tm52_days','tm52_starthour','tm52_endhour',
+ 'tm52_w1orient','tm52_w1area','tm52_w1g','tm52_w1shade','tm52_w1u',
+ 'tm52_w2orient','tm52_w2area','tm52_w2g','tm52_w2shade','tm52_w2u'
+].forEach(id => document.getElementById(id).addEventListener('input', renderTM52));
+
+// =====================================================================
 // Initial render
 // =====================================================================
 rebuildPipeSizeOptions();
@@ -1299,6 +1766,7 @@ renderCondPipe();
 renderCondDuct();
 renderCondRoom();
 renderOvh();
+tm52LoadPreset();
 
 // =====================================================================
 // PWA: register service worker so this page can be installed to a
