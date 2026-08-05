@@ -215,6 +215,9 @@ main { padding: 12px; max-width: 720px; margin: 0 auto 60px; }
 .status { font-size: 11.5px; margin-top: 6px; }
 .status.ok { color: var(--green); }
 .status.err { color: var(--red); }
+.reclist { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
+.reclist li { margin-bottom: 8px; }
+.reclist li strong { color: var(--accent); }
 footer {
   text-align: center;
   font-size: 10.5px;
@@ -837,14 +840,24 @@ footer a { color: var(--accent); }
       <div class="field"><label>Window 1 area (m&sup2;)</label><input type="number" id="tm52_w1area" value="4" min="0" step="0.1"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Glazing g-value</label>
-        <select id="tm52_w1g"><option value="0.85">Single glazing</option><option value="0.76" selected>Standard double</option><option value="0.40">Double, solar control</option><option value="0.50">Triple glazing</option></select>
+      <div class="field"><label>Glazing type</label>
+        <select id="tm52_w1glazing">
+          <option value="0.85|4.8">Single glazing</option>
+          <option value="0.76|2.8" selected>Standard double glazing</option>
+          <option value="0.40|1.6">Double glazing, solar control / Low-E</option>
+          <option value="0.50|0.9">Triple glazing</option>
+          <option value="custom">Custom (enter my own g &amp; U-value)</option>
+        </select>
+        <span class="hint">Sets a typical g-value (solar heat gain) and U-value (conduction) together. g-value drives overheating risk far more than U-value &ndash; use Custom if you have exact manufacturer figures.</span>
       </div>
       <div class="field"><label>Shading</label>
         <select id="tm52_w1shade"><option value="0">None</option><option value="0.2" selected>Some (overhang, blinds)</option><option value="0.4">Good external shading</option></select>
       </div>
     </div>
-    <div class="field"><label>Window U-value (W/m&sup2;K)</label><input type="number" id="tm52_w1u" value="1.4" min="0.5" step="0.1"></div>
+    <div class="row2" id="tm52_w1custom" style="display:none;">
+      <div class="field"><label>Custom g-value</label><input type="number" id="tm52_w1g_custom" value="0.76" min="0.1" max="0.95" step="0.01"></div>
+      <div class="field"><label>Custom U-value (W/m&sup2;K)</label><input type="number" id="tm52_w1u_custom" value="1.4" min="0.4" step="0.1"></div>
+    </div>
 
     <div class="row2">
       <div class="field"><label>Window 2 orientation (optional, 0 area = none)</label>
@@ -853,14 +866,23 @@ footer a { color: var(--accent); }
       <div class="field"><label>Window 2 area (m&sup2;)</label><input type="number" id="tm52_w2area" value="0" min="0" step="0.1"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Glazing g-value</label>
-        <select id="tm52_w2g"><option value="0.85">Single glazing</option><option value="0.76" selected>Standard double</option><option value="0.40">Double, solar control</option><option value="0.50">Triple glazing</option></select>
+      <div class="field"><label>Glazing type</label>
+        <select id="tm52_w2glazing">
+          <option value="0.85|4.8">Single glazing</option>
+          <option value="0.76|2.8" selected>Standard double glazing</option>
+          <option value="0.40|1.6">Double glazing, solar control / Low-E</option>
+          <option value="0.50|0.9">Triple glazing</option>
+          <option value="custom">Custom (enter my own g &amp; U-value)</option>
+        </select>
       </div>
       <div class="field"><label>Shading</label>
         <select id="tm52_w2shade"><option value="0">None</option><option value="0.2" selected>Some (overhang, blinds)</option><option value="0.4">Good external shading</option></select>
       </div>
     </div>
-    <div class="field"><label>Window U-value (W/m&sup2;K)</label><input type="number" id="tm52_w2u" value="1.4" min="0.5" step="0.1"></div>
+    <div class="row2" id="tm52_w2custom" style="display:none;">
+      <div class="field"><label>Custom g-value</label><input type="number" id="tm52_w2g_custom" value="0.76" min="0.1" max="0.95" step="0.01"></div>
+      <div class="field"><label>Custom U-value (W/m&sup2;K)</label><input type="number" id="tm52_w2u_custom" value="1.4" min="0.4" step="0.1"></div>
+    </div>
   </div>
 
   <div class="results">
@@ -872,6 +894,11 @@ footer a { color: var(--accent); }
       <div class="resrow"><span class="k">Criterion 3 &ndash; Upper Limit (never exceeded)</span><span class="v" id="tm52_c3"></span></div>
       <div class="resrow"><span class="k">Peak operative temperature (assessment period)</span><span class="v" id="tm52_peak"></span></div>
       <div class="resrow"><span class="k">Overall</span><span class="v" id="tm52_overall"></span></div>
+    </div>
+    <div class="card" id="tm52_recscard" style="display:none;">
+      <h2>Recommendations</h2>
+      <p class="note">In the order CIBSE / Approved Document O require them to be considered: reduce unwanted solar and internal heat gains first, then remove heat through ventilation, and treat mechanical cooling as a last resort.</p>
+      <ul id="tm52_reclist" class="reclist"></ul>
     </div>
   </div>
 </section>
@@ -1638,23 +1665,37 @@ function tm52ComputeTrmFor(epw) {
   return { trm: TM52Engine.computeRunningMean(dailyMean, order), order };
 }
 
+function tm52ReadGlazing(prefix) {
+  const sel = document.getElementById(prefix + 'glazing');
+  if (sel.value === 'custom') {
+    return {
+      gValue: parseFloat(document.getElementById(prefix + 'g_custom').value) || 0.76,
+      uValue: parseFloat(document.getElementById(prefix + 'u_custom').value) || 1.4
+    };
+  }
+  const [g, u] = sel.value.split('|').map(Number);
+  return { gValue: g, uValue: u };
+}
+
 function tm52CollectRoomParams() {
   const days = document.getElementById('tm52_days').value === 'weekdays' ? [1,2,3,4,5] : [1,2,3,4,5,6,7];
   const windows = [];
   const w1area = parseFloat(document.getElementById('tm52_w1area').value) || 0;
-  if (w1area > 0) windows.push({
-    orientation: document.getElementById('tm52_w1orient').value, area: w1area,
-    gValue: parseFloat(document.getElementById('tm52_w1g').value),
-    shading: parseFloat(document.getElementById('tm52_w1shade').value),
-    uValue: parseFloat(document.getElementById('tm52_w1u').value)
-  });
+  if (w1area > 0) {
+    const g1 = tm52ReadGlazing('tm52_w1');
+    windows.push({
+      orientation: document.getElementById('tm52_w1orient').value, area: w1area,
+      gValue: g1.gValue, shading: parseFloat(document.getElementById('tm52_w1shade').value), uValue: g1.uValue
+    });
+  }
   const w2area = parseFloat(document.getElementById('tm52_w2area').value) || 0;
-  if (w2area > 0) windows.push({
-    orientation: document.getElementById('tm52_w2orient').value, area: w2area,
-    gValue: parseFloat(document.getElementById('tm52_w2g').value),
-    shading: parseFloat(document.getElementById('tm52_w2shade').value),
-    uValue: parseFloat(document.getElementById('tm52_w2u').value)
-  });
+  if (w2area > 0) {
+    const g2 = tm52ReadGlazing('tm52_w2');
+    windows.push({
+      orientation: document.getElementById('tm52_w2orient').value, area: w2area,
+      gValue: g2.gValue, shading: parseFloat(document.getElementById('tm52_w2shade').value), uValue: g2.uValue
+    });
+  }
   return {
     floorArea: parseFloat(document.getElementById('tm52_floor').value) || 1,
     roomHeight: parseFloat(document.getElementById('tm52_height').value) || 2.4,
@@ -1694,6 +1735,71 @@ function renderTM52() {
     verdict = `<span class="badge fail">FAIL</span> Does not meet TM52 &ndash; ${result.failCount} of 3 criteria breached. Review glazing/solar exposure, thermal mass, shading or ventilation.`;
   }
   document.getElementById('tm52_verdict').innerHTML = verdict;
+
+  tm52RenderRecommendations(params, result);
+}
+
+// =====================================================================
+// TM52 Recommendations — rule-based, ordered per the CIBSE / Approved
+// Document O cooling hierarchy: (1) reduce solar & internal gains,
+// (2) remove heat via ventilation, (3) mechanical cooling as a last
+// resort. Tailored to which criteria are failing and by how much.
+// =====================================================================
+function tm52RenderRecommendations(params, result) {
+  const card = document.getElementById('tm52_recscard');
+  const list = document.getElementById('tm52_reclist');
+  const recs = tm52GenerateRecommendations(params, result);
+  list.innerHTML = recs.map(r => `<li>${r}</li>`).join('');
+  card.style.display = recs.length ? 'block' : 'none';
+}
+
+function tm52GenerateRecommendations(params, result) {
+  const recs = [];
+  const anyFail = !result.overallPass;
+  const marginal = result.overallPass && (result.criterion1.pctExceed > 1.5 || result.criterion2.maxDailyWe > 3);
+
+  if (!anyFail && !marginal) {
+    recs.push('<strong>Comfortably within all three criteria</strong> under this weather profile &ndash; no changes needed, but keep the glazing, shading and ventilation assumptions here consistent with what actually gets specified and built.');
+    return recs;
+  }
+  if (!anyFail && marginal) {
+    recs.push('<strong>Passes, but with limited margin.</strong> A hotter design summer year, a slightly different glazing spec, or reduced ventilation on site could tip this into failure &ndash; worth adding some headroom rather than treating this as a comfortable pass.');
+  }
+
+  const worstWindow = params.windows.slice().sort((a, b) => (b.area * b.gValue * (1 - b.shading)) - (a.area * a.gValue * (1 - a.shading)))[0];
+  const totalWinArea = params.windows.reduce((s, w) => s + w.area, 0);
+  const glazingRatio = params.wallArea > 0 ? totalWinArea / (totalWinArea + params.wallArea) : 0;
+
+  if (worstWindow && worstWindow.shading === 0) {
+    recs.push(`<strong>Add shading to the ${worstWindow.orientation}-facing window.</strong> It currently has none specified &ndash; external shading (overhang, brise soleil, deep reveals, or external blinds) typically cuts solar gain by 20&ndash;40% and is the single most effective lever here.`);
+  } else if (worstWindow && worstWindow.gValue > 0.5 && ['S','SE','SW','W'].indexOf(worstWindow.orientation) !== -1) {
+    recs.push(`<strong>Consider solar-control or Low-E glazing on the ${worstWindow.orientation}-facing window.</strong> Its g-value (${worstWindow.gValue}) is doing most of the work in this result &ndash; dropping to a solar-control specification (g &asymp; 0.4) reduces solar gain far more than changing the U-value would.`);
+  }
+  if (glazingRatio > 0.35) {
+    recs.push(`<strong>Glazing area is large relative to wall area</strong> (&asymp;${Math.round(glazingRatio * 100)}% of the external envelope on this elevation) &ndash; if the layout allows it, reducing window area or splitting it across a less exposed orientation reduces solar gain directly.`);
+  }
+  if (params.internalGainsW > 250) {
+    recs.push('<strong>Internal gains are on the higher side.</strong> Check whether occupancy/equipment loads can be reduced or better distributed &ndash; every watt of internal gain adds directly to the same heat balance as solar gain.');
+  }
+
+  if (params.ach < 2.5) {
+    recs.push('<strong>Ventilation rate is low</strong> &ndash; this is very often the deciding factor once solar gains are already reasonable. If noise, security or pollution rule out simply opening windows further, look at secure/acoustically-attenuated night-vents or trickle vents sized for purge ventilation, so the room can flush accumulated heat overnight.');
+  } else if (params.ach < 4) {
+    recs.push('<strong>Ventilation is moderate.</strong> Cross-ventilation (openings on two different elevations) is far more effective than single-aspect opening &ndash; worth checking whether a second opening is feasible, even a small one.');
+  }
+
+  if (params.massClass === 'light' && anyFail) {
+    recs.push('<strong>Exposing thermal mass would help buffer peaks.</strong> Lightweight construction tracks solar and internal gains almost instantly; exposed soffits/floors (avoiding suspended ceilings or raised access floors that hide mass) let the structure absorb daytime heat and release it overnight instead.');
+  }
+  if (params.topFloor && params.roofU > 0.25) {
+    recs.push(`<strong>Roof U-value (${params.roofU} W/m&sup2;K) is a significant gain path on a top-floor room.</strong> Improving roof insulation, or adding a light-coloured/reflective roof finish, reduces both the conducted and re-radiated heat reaching the room below.`);
+  }
+
+  if (!result.criterion3.pass && result.criterion1.pctExceed > 6) {
+    recs.push('<strong>This is failing by a wide margin</strong> &ndash; passive measures above may not be enough on their own. Per the CIBSE/Part O hierarchy, mechanical cooling should only be considered once solar gain reduction and ventilation improvements have genuinely been exhausted, not as a first response.');
+  }
+
+  return recs;
 }
 
 document.getElementById('tm52_wxsource').addEventListener('change', function() {
@@ -1748,10 +1854,19 @@ document.querySelectorAll('#panel-tm52 .quickpick button').forEach(btn => {
   });
 });
 
+document.getElementById('tm52_w1glazing').addEventListener('change', function() {
+  document.getElementById('tm52_w1custom').style.display = this.value === 'custom' ? 'flex' : 'none';
+  renderTM52();
+});
+document.getElementById('tm52_w2glazing').addEventListener('change', function() {
+  document.getElementById('tm52_w2custom').style.display = this.value === 'custom' ? 'flex' : 'none';
+  renderTM52();
+});
+
 ['tm52_floor','tm52_height','tm52_mass','tm52_wallarea','tm52_wallu','tm52_topfloor','tm52_roofu',
  'tm52_ach','tm52_gains','tm52_days','tm52_starthour','tm52_endhour',
- 'tm52_w1orient','tm52_w1area','tm52_w1g','tm52_w1shade','tm52_w1u',
- 'tm52_w2orient','tm52_w2area','tm52_w2g','tm52_w2shade','tm52_w2u'
+ 'tm52_w1orient','tm52_w1area','tm52_w1shade','tm52_w1g_custom','tm52_w1u_custom',
+ 'tm52_w2orient','tm52_w2area','tm52_w2shade','tm52_w2g_custom','tm52_w2u_custom'
 ].forEach(id => document.getElementById(id).addEventListener('input', renderTM52));
 
 // =====================================================================
