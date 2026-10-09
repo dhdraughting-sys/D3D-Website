@@ -251,6 +251,29 @@ footer a { color: var(--accent); }
 @media (prefers-color-scheme: dark) {
   .disclaimer { background: #3a3220; border-color: #5c4c25; color: #e6d3a0; }
 }
+
+/* ===== Cable Sizing (BS 7671) tab ===== */
+#panel-cable{--cs-hi:#fff3cd}
+@media (prefers-color-scheme:dark){#panel-cable{--cs-hi:#4a4220}}
+#panel-cable .cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#panel-cable .cs-full{grid-column:1/-1}
+#panel-cable label{display:block;font-size:12px;font-weight:600;margin-bottom:4px}
+#panel-cable input[type=number],#panel-cable select{width:100%;padding:9px 10px;font-size:15px;border:1px solid var(--border);border-radius:7px;background:var(--input-bg);color:var(--text);-webkit-appearance:none;appearance:none}
+#panel-cable input:disabled,#panel-cable select:disabled{opacity:.5}
+#panel-cable label.cs-chk{display:flex;gap:8px;align-items:center;font-weight:400;margin:0}
+#panel-cable label.cs-chk input{width:auto}
+#panel-cable .cs-head{font-size:12.5px;color:var(--muted);line-height:1.5}
+#panel-cable .cs-rec{font-size:21px;font-weight:700;margin:4px 0}
+#panel-cable .cs-rec.ok{color:var(--green)}#panel-cable .cs-rec.bad{color:var(--red)}
+#panel-cable .cs-tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#panel-cable table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}
+#panel-cable th,#panel-cable td{padding:5px 7px;border-bottom:1px solid var(--border);text-align:center}
+#panel-cable th{color:var(--muted);font-weight:600}
+#panel-cable tr.cs-r td{background:var(--cs-hi);font-weight:700}
+#panel-cable td.p{color:var(--green)}#panel-cable td.f{color:var(--red);font-weight:700}
+#panel-cable .cs-warn{font-size:11.5px;color:var(--muted);margin:6px 0 0;line-height:1.45}
+#panel-cable button{padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+@media (max-width:520px){#panel-cable .cs-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -275,6 +298,7 @@ footer a { color: var(--accent); }
   <button class="tab-btn" data-tab="cond">Condensation</button>
   <button class="tab-btn" data-tab="ovh">Summer Overheating</button>
   <button class="tab-btn" data-tab="tm52">TM52 (Advanced)</button>
+  <button class="tab-btn" data-tab="cable">Cable Sizing</button>
 </nav>
 
 <main>
@@ -901,6 +925,56 @@ footer a { color: var(--accent); }
       <ul id="tm52_reclist" class="reclist"></ul>
     </div>
   </div>
+</section>
+
+<!-- ============================= CABLE SIZING (BS 7671) ============================= -->
+<section class="panel" id="panel-cable">
+ <div class="card">
+  <h2>Load and protection</h2>
+  <div class="cs-grid">
+   <div><label for="cs-phase">Supply</label><select id="cs-phase"><option value="1">Single-phase 230 V</option><option value="3">Three-phase 400 V</option></select></div>
+   <div><label for="cs-kw">Load power (kW)</label><input id="cs-kw" type="number" inputmode="decimal" step="any" value="7.2"></div>
+   <div class="cs-full"><label class="cs-chk"><input id="cs-ibchk" type="checkbox"> Enter design current Ib directly</label></div>
+   <div><label for="cs-ib">Ib (A)</label><input id="cs-ib" type="number" inputmode="decimal" step="any" value="30"></div>
+   <div><label for="cs-pf">Power factor</label><input id="cs-pf" type="number" inputmode="decimal" step="0.05" value="1"></div>
+   <div><label for="cs-eff">Efficiency</label><input id="cs-eff" type="number" inputmode="decimal" step="0.05" value="1"></div>
+   <div><label for="cs-dev">Device curve</label><select id="cs-dev"><option>B</option><option>C</option><option>D</option><option value="OTHER">Other (fuse / MCCB)</option></select></div>
+   <div><label class="cs-chk" style="margin-top:22px"><input id="cs-inauto" type="checkbox" checked> Auto-select In</label></div>
+   <div><label for="cs-in">In (A)</label><input id="cs-in" type="number" inputmode="decimal" step="any" value="32"></div>
+   <div class="cs-full"><label class="cs-chk"><input id="cs-3036" type="checkbox"> BS 3036 rewirable fuse (Cc 0.725)</label></div>
+   <div><label for="cs-ozs">Zs max, other (&Omega;)</label><input id="cs-ozs" type="number" inputmode="decimal" step="any" value="1"></div>
+   <div><label for="cs-ot">Disconnect time, other (s)</label><input id="cs-ot" type="number" inputmode="decimal" step="any" value="0.4"></div>
+  </div>
+ </div>
+ <div class="card">
+  <h2>Cable and installation</h2>
+  <div class="cs-grid">
+   <div class="cs-full"><label for="cs-cable">Cable</label><select id="cs-cable"></select></div>
+   <div class="cs-full"><label for="cs-method">Installation method</label><select id="cs-method"></select></div>
+   <div><label for="cs-amb">Ambient air (&deg;C)</label><input id="cs-amb" type="number" inputmode="decimal" step="5" value="30"></div>
+   <div><label for="cs-gnd">Ground temp (&deg;C)</label><input id="cs-gnd" type="number" inputmode="decimal" step="5" value="20"></div>
+   <div><label for="cs-grp">Grouping</label><select id="cs-grp"><option value="bunched">Bunched / enclosed</option><option value="single_layer">Single layer, clipped</option><option value="custom">Custom Cg</option></select></div>
+   <div><label for="cs-n">Circuits grouped</label><input id="cs-n" type="number" inputmode="numeric" min="1" step="1" value="1"></div>
+   <div><label for="cs-cg">Custom Cg</label><input id="cs-cg" type="number" inputmode="decimal" step="0.05" value="1"></div>
+   <div><label for="cs-ins">Thermal insulation</label><select id="cs-ins"></select></div>
+   <div><label for="cs-len">Route length (m)</label><input id="cs-len" type="number" inputmode="decimal" step="any" value="18"></div>
+   <div><label for="cs-use">Circuit use</label><select id="cs-use"><option value="other">Other (5 %)</option><option value="lighting">Lighting (3 %)</option></select></div>
+   <div class="cs-full"><label class="cs-chk"><input id="cs-priv" type="checkbox"> Private supply (6 % / 8 % limits)</label></div>
+   <div><label for="cs-ze">Ze at origin (&Omega;)</label><input id="cs-ze" type="number" inputmode="decimal" step="0.05" value="0.35"></div>
+   <div><label class="cs-chk" style="margin-top:22px"><input id="cs-ipfchk" type="checkbox"> Check at Ipf</label></div>
+   <div><label for="cs-ipf">Ipf (kA)</label><input id="cs-ipf" type="number" inputmode="decimal" step="any" value="6"></div>
+  </div>
+ </div>
+ <div class="card" style="border-left:4px solid var(--accent)">
+  <div id="cs-head" class="cs-head"></div>
+  <div id="cs-rec" class="cs-rec"></div>
+  <div id="cs-sub" class="cs-head"></div>
+  <div class="cs-tw" style="margin-top:10px"><table id="cs-tab"></table></div>
+  <div id="cs-warn" class="cs-warn"></div>
+  <div style="margin-top:10px"><button id="cs-copy" type="button">Copy summary</button></div>
+ </div>
+ <p class="note">Indicative only. Ratings are manufacturer data (sources below); correction factors and Zs limits use the published formulae. Always verify against the current BS 7671 and the cable data sheet before issuing a design.</p>
+ <p class="note" id="cs-src"></p>
 </section>
 
 </main>
@@ -1973,6 +2047,154 @@ if ('serviceWorker' in navigator) {
   });
 })();
 </script>
+
+
+<script>
+// Cable Sizing (BS 7671) - same engine as the MEP Design Platform Cable Sizing tool
+(function(){
+"use strict";
+var D={"STANDARD_IN":[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630],"MCB_MULTIPLIER":{"B":5,"C":10,"D":20},"GROUPING_BUNCHED":{"1":1.0,"2":0.8,"3":0.7,"4":0.65,"5":0.6,"6":0.57,"7":0.54,"8":0.52,"9":0.5,"10":0.48,"12":0.45,"14":0.43,"16":0.41,"18":0.39,"20":0.38},"GROUPING_SINGLE_LAYER":{"1":1.0,"2":0.85,"3":0.79,"4":0.75,"5":0.73,"6":0.72,"7":0.72,"8":0.71,"9":0.7},"INSULATION_OPTIONS":{"none":["Not in thermal insulation",1.0],"one_side":["Touching thermal insulation on one side",0.89],"surrounded":["Totally surrounded by insulation > 0.5 m",0.5]},"INSULATION_TEMP":{"PVC70":70.0,"XLPE90":90.0},"K_LINE":{"PVC70":115,"XLPE90":143},"K_CPC_IN_CABLE":{"PVC70":143,"XLPE90":176},"K_ARMOUR_STEEL":{"PVC70":51,"XLPE90":46},"METHOD_LABELS":{"A":"Method A - cable in conduit in a thermally insulating wall","C":"Method C - clipped direct to a surface","AIR":"In free air / on tray (manufacturer 'in air' rating)","DUCT":"In buried ducts (manufacturer rating - check vs BS 7671 A4:2026)","GROUND":"Direct in ground (manufacturer rating - check vs BS 7671 A4:2026)"},"CABLE_LIBRARY":{"tne_6242y":{"name":"6242Y flat twin & earth, PVC 70 C, copper (1-phase)","insulation":"PVC70","phases":1,"cpc":"incorporated","methods":["A","C"],"source":"BS 6004 6242Y twin & earth PVC data sheet (Farnell V1.0 22/04/20). Method A = Table 4A2 method 2; Method C = method 20; ratings per BS 7671 Table 4D5. Other methods (B, in insulation) are not in this library - use 'Custom'.","sizes":[{"csa":1.0,"cpc_csa":1.0,"ratings":{"A":11.5,"C":16},"mv":44,"r_line_mohm_m":18.1,"r_cpc_mohm_m":18.1},{"csa":1.5,"cpc_csa":1.0,"ratings":{"A":14.5,"C":20},"mv":29,"r_line_mohm_m":12.1,"r_cpc_mohm_m":18.1},{"csa":2.5,"cpc_csa":1.5,"ratings":{"A":20,"C":27},"mv":18,"r_line_mohm_m":7.41,"r_cpc_mohm_m":12.1},{"csa":4.0,"cpc_csa":1.5,"ratings":{"A":26,"C":37},"mv":11,"r_line_mohm_m":4.61,"r_cpc_mohm_m":12.1},{"csa":6.0,"cpc_csa":2.5,"ratings":{"A":32,"C":47},"mv":7.3,"r_line_mohm_m":3.08,"r_cpc_mohm_m":7.41},{"csa":10.0,"cpc_csa":4.0,"ratings":{"A":44,"C":64},"mv":4.4,"r_line_mohm_m":1.83,"r_cpc_mohm_m":4.61},{"csa":16.0,"cpc_csa":6.0,"ratings":{"A":57,"C":85},"mv":2.8,"r_line_mohm_m":1.15,"r_cpc_mohm_m":3.08}]},"swa_xlpe_2c":{"name":"2-core XLPE/SWA/PVC (BS 5467), 90 C, copper (1-phase)","insulation":"XLPE90","phases":1,"cpc":"armour","methods":["AIR","DUCT","GROUND"],"source":"Prysmian BS 5467 XLPE/SWA/PVC data sheet (ref BS5467/01/14); ERA 69-30 ratings: 25 C air, 15 C ground, 0.5 m burial, 1.2 K.m/W. Values were read from the PDF by text extraction - verify against the data sheet before issue.","sizes":[{"csa":1.5,"cpc_csa":null,"ratings":{"AIR":31,"DUCT":31,"GROUND":38},"mv":31,"r_line_mohm_m":12.1,"armour_csa":15,"armour_r_mohm_m":10.2},{"csa":2.5,"cpc_csa":null,"ratings":{"AIR":41,"DUCT":41,"GROUND":49},"mv":19,"r_line_mohm_m":7.41,"armour_csa":17,"armour_r_mohm_m":8.8},{"csa":4.0,"cpc_csa":null,"ratings":{"AIR":55,"DUCT":53,"GROUND":65},"mv":12,"r_line_mohm_m":4.61,"armour_csa":19,"armour_r_mohm_m":7.9},{"csa":6.0,"cpc_csa":null,"ratings":{"AIR":70,"DUCT":67,"GROUND":81},"mv":7.9,"r_line_mohm_m":3.08,"armour_csa":22,"armour_r_mohm_m":7.0},{"csa":10.0,"cpc_csa":null,"ratings":{"AIR":95,"DUCT":89,"GROUND":109},"mv":4.7,"r_line_mohm_m":1.83,"armour_csa":26,"armour_r_mohm_m":6.0},{"csa":16.0,"cpc_csa":null,"ratings":{"AIR":126,"DUCT":115,"GROUND":141},"mv":2.9,"r_line_mohm_m":1.15,"armour_csa":42,"armour_r_mohm_m":3.7},{"csa":25.0,"cpc_csa":null,"ratings":{"AIR":164,"DUCT":148,"GROUND":183},"mv":1.9,"r_line_mohm_m":0.727,"armour_csa":42,"armour_r_mohm_m":3.7},{"csa":35.0,"cpc_csa":null,"ratings":{"AIR":202,"DUCT":178,"GROUND":219},"mv":1.35,"r_line_mohm_m":0.524,"armour_csa":60,"armour_r_mohm_m":2.6},{"csa":50.0,"cpc_csa":null,"ratings":{"AIR":244,"DUCT":211,"GROUND":259},"mv":1.0,"r_line_mohm_m":0.387,"armour_csa":68,"armour_r_mohm_m":2.3},{"csa":70.0,"cpc_csa":null,"ratings":{"AIR":306,"DUCT":260,"GROUND":317},"mv":0.69,"r_line_mohm_m":0.268,"armour_csa":80,"armour_r_mohm_m":2.0},{"csa":95.0,"cpc_csa":null,"ratings":{"AIR":378,"DUCT":313,"GROUND":381},"mv":0.52,"r_line_mohm_m":0.193,"armour_csa":113,"armour_r_mohm_m":1.4},{"csa":120.0,"cpc_csa":null,"ratings":{"AIR":437,"DUCT":357,"GROUND":433},"mv":0.42,"r_line_mohm_m":0.153,"armour_csa":125,"armour_r_mohm_m":1.3},{"csa":150.0,"cpc_csa":null,"ratings":{"AIR":499,"DUCT":401,"GROUND":485},"mv":0.35,"r_line_mohm_m":0.124,"armour_csa":138,"armour_r_mohm_m":1.2},{"csa":185.0,"cpc_csa":null,"ratings":{"AIR":576,"DUCT":455,"GROUND":547},"mv":0.29,"r_line_mohm_m":0.0991,"armour_csa":191,"armour_r_mohm_m":0.82},{"csa":240.0,"cpc_csa":null,"ratings":{"AIR":680,"DUCT":527,"GROUND":632},"mv":0.24,"r_line_mohm_m":0.0754,"armour_csa":215,"armour_r_mohm_m":0.73},{"csa":300.0,"cpc_csa":null,"ratings":{"AIR":775,"DUCT":592,"GROUND":708},"mv":0.21,"r_line_mohm_m":0.0601,"armour_csa":235,"armour_r_mohm_m":0.67}],"ref_air_c":25.0,"ref_ground_c":15.0},"swa_xlpe_3c":{"name":"3-core XLPE/SWA/PVC (BS 5467), 90 C, copper (3-phase)","insulation":"XLPE90","phases":3,"cpc":"armour","methods":["AIR","DUCT","GROUND"],"source":"Prysmian BS 5467 XLPE/SWA/PVC data sheet (ref BS5467/01/14); ERA 69-30 ratings: 25 C air, 15 C ground, 0.5 m burial, 1.2 K.m/W. Values were read from the PDF by text extraction - verify against the data sheet before issue.","sizes":[{"csa":1.5,"cpc_csa":null,"ratings":{"AIR":26,"DUCT":26,"GROUND":32},"mv":27,"r_line_mohm_m":12.1,"armour_csa":16,"armour_r_mohm_m":9.5},{"csa":2.5,"cpc_csa":null,"ratings":{"AIR":35,"DUCT":34,"GROUND":42},"mv":16,"r_line_mohm_m":7.41,"armour_csa":19,"armour_r_mohm_m":8.2},{"csa":4.0,"cpc_csa":null,"ratings":{"AIR":47,"DUCT":45,"GROUND":55},"mv":10,"r_line_mohm_m":4.61,"armour_csa":20,"armour_r_mohm_m":7.5},{"csa":6.0,"cpc_csa":null,"ratings":{"AIR":59,"DUCT":56,"GROUND":69},"mv":6.8,"r_line_mohm_m":3.08,"armour_csa":23,"armour_r_mohm_m":6.7},{"csa":10.0,"cpc_csa":null,"ratings":{"AIR":82,"DUCT":75,"GROUND":92},"mv":4.0,"r_line_mohm_m":1.83,"armour_csa":39,"armour_r_mohm_m":4.0},{"csa":16.0,"cpc_csa":null,"ratings":{"AIR":107,"DUCT":96,"GROUND":119},"mv":2.5,"r_line_mohm_m":1.15,"armour_csa":45,"armour_r_mohm_m":3.5},{"csa":25.0,"cpc_csa":null,"ratings":{"AIR":140,"DUCT":124,"GROUND":152},"mv":1.65,"r_line_mohm_m":0.727,"armour_csa":62,"armour_r_mohm_m":2.5},{"csa":35.0,"cpc_csa":null,"ratings":{"AIR":172,"DUCT":149,"GROUND":182},"mv":1.15,"r_line_mohm_m":0.524,"armour_csa":68,"armour_r_mohm_m":2.3},{"csa":50.0,"cpc_csa":null,"ratings":{"AIR":209,"DUCT":177,"GROUND":217},"mv":0.87,"r_line_mohm_m":0.387,"armour_csa":78,"armour_r_mohm_m":2.0},{"csa":70.0,"cpc_csa":null,"ratings":{"AIR":263,"DUCT":218,"GROUND":266},"mv":0.6,"r_line_mohm_m":0.268,"armour_csa":90,"armour_r_mohm_m":1.8},{"csa":95.0,"cpc_csa":null,"ratings":{"AIR":324,"DUCT":263,"GROUND":319},"mv":0.45,"r_line_mohm_m":0.193,"armour_csa":128,"armour_r_mohm_m":1.3},{"csa":120.0,"cpc_csa":null,"ratings":{"AIR":376,"DUCT":300,"GROUND":363},"mv":0.37,"r_line_mohm_m":0.153,"armour_csa":141,"armour_r_mohm_m":1.2},{"csa":150.0,"cpc_csa":null,"ratings":{"AIR":430,"DUCT":338,"GROUND":406},"mv":0.3,"r_line_mohm_m":0.124,"armour_csa":201,"armour_r_mohm_m":0.78},{"csa":185.0,"cpc_csa":null,"ratings":{"AIR":495,"DUCT":382,"GROUND":458},"mv":0.26,"r_line_mohm_m":0.0991,"armour_csa":220,"armour_r_mohm_m":0.71},{"csa":240.0,"cpc_csa":null,"ratings":{"AIR":584,"DUCT":442,"GROUND":529},"mv":0.21,"r_line_mohm_m":0.0754,"armour_csa":250,"armour_r_mohm_m":0.63},{"csa":300.0,"cpc_csa":null,"ratings":{"AIR":666,"DUCT":496,"GROUND":592},"mv":0.185,"r_line_mohm_m":0.0601,"armour_csa":269,"armour_r_mohm_m":0.58}],"ref_air_c":25.0,"ref_ground_c":15.0},"swa_xlpe_4c":{"name":"4-core XLPE/SWA/PVC (BS 5467), 90 C, copper (3-phase)","insulation":"XLPE90","phases":3,"cpc":"armour","methods":["AIR","DUCT","GROUND"],"source":"Prysmian BS 5467 XLPE/SWA/PVC data sheet (ref BS5467/01/14); ERA 69-30 ratings: 25 C air, 15 C ground, 0.5 m burial, 1.2 K.m/W. Values were read from the PDF by text extraction - verify against the data sheet before issue.","sizes":[{"csa":1.5,"cpc_csa":null,"ratings":{"AIR":26,"DUCT":26,"GROUND":32},"mv":27,"r_line_mohm_m":12.1,"armour_csa":17,"armour_r_mohm_m":8.8},{"csa":2.5,"cpc_csa":null,"ratings":{"AIR":35,"DUCT":34,"GROUND":42},"mv":16,"r_line_mohm_m":7.41,"armour_csa":20,"armour_r_mohm_m":7.7},{"csa":4.0,"cpc_csa":null,"ratings":{"AIR":47,"DUCT":45,"GROUND":55},"mv":10,"r_line_mohm_m":4.61,"armour_csa":22,"armour_r_mohm_m":6.8},{"csa":6.0,"cpc_csa":null,"ratings":{"AIR":59,"DUCT":56,"GROUND":69},"mv":6.8,"r_line_mohm_m":3.08,"armour_csa":36,"armour_r_mohm_m":4.3},{"csa":10.0,"cpc_csa":null,"ratings":{"AIR":82,"DUCT":75,"GROUND":92},"mv":4.0,"r_line_mohm_m":1.83,"armour_csa":42,"armour_r_mohm_m":3.7},{"csa":16.0,"cpc_csa":null,"ratings":{"AIR":107,"DUCT":96,"GROUND":119},"mv":2.5,"r_line_mohm_m":1.15,"armour_csa":50,"armour_r_mohm_m":3.1},{"csa":25.0,"cpc_csa":null,"ratings":{"AIR":140,"DUCT":124,"GROUND":152},"mv":1.65,"r_line_mohm_m":0.727,"armour_csa":70,"armour_r_mohm_m":2.3},{"csa":35.0,"cpc_csa":null,"ratings":{"AIR":172,"DUCT":149,"GROUND":182},"mv":1.15,"r_line_mohm_m":0.524,"armour_csa":78,"armour_r_mohm_m":2.0},{"csa":50.0,"cpc_csa":null,"ratings":{"AIR":209,"DUCT":177,"GROUND":217},"mv":0.87,"r_line_mohm_m":0.387,"armour_csa":90,"armour_r_mohm_m":1.8},{"csa":70.0,"cpc_csa":null,"ratings":{"AIR":263,"DUCT":218,"GROUND":266},"mv":0.6,"r_line_mohm_m":0.268,"armour_csa":131,"armour_r_mohm_m":1.2},{"csa":95.0,"cpc_csa":null,"ratings":{"AIR":324,"DUCT":263,"GROUND":319},"mv":0.45,"r_line_mohm_m":0.193,"armour_csa":147,"armour_r_mohm_m":1.1},{"csa":120.0,"cpc_csa":null,"ratings":{"AIR":376,"DUCT":300,"GROUND":363},"mv":0.37,"r_line_mohm_m":0.153,"armour_csa":206,"armour_r_mohm_m":0.76},{"csa":150.0,"cpc_csa":null,"ratings":{"AIR":430,"DUCT":338,"GROUND":406},"mv":0.3,"r_line_mohm_m":0.124,"armour_csa":230,"armour_r_mohm_m":0.68},{"csa":185.0,"cpc_csa":null,"ratings":{"AIR":495,"DUCT":382,"GROUND":458},"mv":0.26,"r_line_mohm_m":0.0991,"armour_csa":255,"armour_r_mohm_m":0.61},{"csa":240.0,"cpc_csa":null,"ratings":{"AIR":584,"DUCT":442,"GROUND":529},"mv":0.21,"r_line_mohm_m":0.0754,"armour_csa":289,"armour_r_mohm_m":0.54},{"csa":300.0,"cpc_csa":null,"ratings":{"AIR":666,"DUCT":496,"GROUND":592},"mv":0.185,"r_line_mohm_m":0.0601,"armour_csa":319,"armour_r_mohm_m":0.49}],"ref_air_c":25.0,"ref_ground_c":15.0}}};
+var $=function(id){return document.getElementById(id)};
+var M=D.METHOD_LABELS;
+function designCurrent(kw,v,ph,pf,ef){var p=kw*1000;return ph===3?p/(Math.sqrt(3)*v*pf*ef):p/(v*pf*ef);}
+function nextIn(ib){for(var i=0;i<D.STANDARD_IN.length;i++){if(D.STANDARD_IN[i]>=ib-1e-9)return D.STANDARD_IN[i];}return D.STANDARD_IN[D.STANDARD_IN.length-1];}
+function ambF(ins,ta,ref){var t=D.INSULATION_TEMP[ins];if(ta>=t)throw new Error("Ambient temperature must be below the cable's maximum temperature");return Math.sqrt((t-ta)/(t-ref));}
+function grpF(arr,n){n=Math.max(1,Math.floor(n));
+ if(arr==="single_layer"){return D.GROUPING_SINGLE_LAYER[Math.min(n,9)];}
+ var keys=Object.keys(D.GROUPING_BUNCHED).map(Number).sort(function(a,b){return a-b});
+ if(n>=keys[keys.length-1])return D.GROUPING_BUNCHED[keys[keys.length-1]];
+ if(D.GROUPING_BUNCHED[n]!==undefined)return D.GROUPING_BUNCHED[n];
+ var up=keys.filter(function(k){return k>=n})[0];return D.GROUPING_BUNCHED[up];}
+function tmult(ins,a){return 1+a*(D.INSULATION_TEMP[ins]-20);}
+function calc(i){
+ var c=D.CABLE_LIBRARY[i.cable],ins=c.insulation,W=[];
+ if(c.methods.indexOf(i.method)<0)throw new Error("Method not available for this cable");
+ if(c.phases!==i.phases)W.push("This cable type is for "+c.phases+"-phase circuits but the supply is set to "+i.phases+"-phase.");
+ var ib=(i.ib!==null)?i.ib:designCurrent(i.kw,i.v,i.phases,i.pf,i.eff);
+ if(!(ib>0))throw new Error("Design current must be greater than 0");
+ var inA=i.inA?i.inA:nextIn(ib);
+ if(inA<ib-1e-9)W.push("In ("+inA+" A) is below the design current Ib ("+ib.toFixed(1)+" A) - Reg 433.1.1 not met.");
+ var cc=i.bs3036?0.725:1.0;
+ var refAir=c.ref_air_c||30,refG=c.ref_ground_c||20,ca;
+ if(i.method==="GROUND"||i.method==="DUCT"){
+  var tm=D.INSULATION_TEMP[ins];if(i.ground>=tm)throw new Error("Ground temperature too high");
+  ca=Math.sqrt((tm-i.ground)/(tm-refG));
+ }else ca=ambF(ins,i.amb,refAir);
+ var cg=(i.grp==="custom")?i.cg:grpF(i.grp,i.n);
+ var ci=D.INSULATION_OPTIONS[i.ins][1];
+ var it=inA/(ca*cg*ci*cc);
+ var vdl=(i.use==="lighting"?3:5)+(i.priv?3:0),vdn=i.phases===3?400:230;
+ var mult=tmult(ins,0.004),multS=tmult(ins,0.0045);
+ var m=D.MCB_MULTIPLIER[i.dev];
+ var zsMax=(m!==undefined)?i.uo/(m*inA):i.ozs;
+ var L=i.len,out=[];
+ c.sizes.forEach(function(s){
+  var tab=s.ratings[i.method],iz=tab*ca*cg*ci;
+  var thermal=(tab>=it-1e-9)&&(inA>=ib-1e-9);
+  var vd=s.mv*ib*L/1000,vdp=vd/vdn*100,vdok=vdp<=vdl+1e-9;
+  var maxL=(vdl/100*vdn)*1000/(s.mv*ib);
+  var r1r2,k,cpcA;
+  if(c.cpc==="incorporated"){r1r2=s.r_line_mohm_m*mult+s.r_cpc_mohm_m*mult;k=D.K_CPC_IN_CABLE[ins];cpcA=s.cpc_csa;}
+  else{r1r2=s.r_line_mohm_m*mult+s.armour_r_mohm_m*multS;k=D.K_ARMOUR_STEEL[ins];cpcA=s.armour_csa;}
+  var zs=i.ze+r1r2*L/1000;
+  var zsok=(zsMax===null||zsMax===undefined)?null:(zs<=zsMax+1e-9);
+  var ief=zs>0?i.uo/zs:null,t=null;
+  if(m!==undefined){t=(ief!==null&&ief>=m*inA)?0.1:null;}else{t=i.ot;}
+  var smin=null,cpcok=null;
+  if(ief!==null&&t!==null){smin=ief*Math.sqrt(t)/k;cpcok=cpcA>=smin-1e-9;}
+  else if(m!==undefined){cpcok=false;}
+  var slin=null,lok=null;
+  if(i.ipf){slin=i.ipf*1000*Math.sqrt(0.1)/D.K_LINE[ins];lok=s.csa>=slin-1e-9;}
+  var chk=[thermal,vdok];if(zsok!==null)chk.push(zsok);if(cpcok!==null)chk.push(cpcok);if(lok!==null)chk.push(lok);
+  out.push({csa:s.csa,tab:tab,iz:iz,thermal:thermal,vd:vd,vdp:vdp,vdok:vdok,maxL:maxL,zs:zs,zsMax:zsMax,zsok:zsok,ief:ief,t:t,smin:smin,cpcA:cpcA,cpcok:cpcok,slin:slin,lok:lok,ok:chk.every(function(x){return x})});
+ });
+ var rec=null;for(var q=0;q<out.length;q++){if(out[q].ok){rec=out[q];break;}}
+ var gov="";
+ if(rec){
+  var ft=out.filter(function(r){return r.thermal})[0],fv=out.filter(function(r){return r.vdok})[0];
+  var ff=out.filter(function(r){return (r.zsok===true||r.zsok===null)&&(r.cpcok===true||r.cpcok===null)})[0];
+  var rk=[["current-carrying capacity",ft],["voltage drop",fv],["earth-fault / protective conductor",ff]].filter(function(x){return x[1]});
+  var best=rk[0];rk.forEach(function(x){if(x[1].csa>best[1].csa)best=x;});gov=best[0];
+ }else W.push("No size in this cable's library passes every check - consider a larger cable type, parallel runs, a shorter length, or a different protective device.");
+ if(i.method==="DUCT"||i.method==="GROUND")W.push("Buried ratings are manufacturer values (soil 1.2 K.m/W, 0.5 m depth). BS 7671:2018+A4:2026 revised the buried-cable tables - check against them.");
+ if(i.grp!=="custom")W.push("Grouping factors follow BS 7671 Table 4C1 rows for bunched / single-layer clipped cables; use Custom Cg for ducts, trays or buried groups.");
+ return {ib:ib,inA:inA,ca:ca,cg:cg,ci:ci,cc:cc,it:it,vdl:vdl,cable:c.name,method:M[i.method],sizes:out,rec:rec,gov:gov,W:W};
+}
+function read(){
+ var ph=+$("cs-phase").value,useIb=$("cs-ibchk").checked,dev=$("cs-dev").value;
+ return {kw:+$("cs-kw").value,ib:useIb?+$("cs-ib").value:null,v:ph===3?400:230,phases:ph,pf:+$("cs-pf").value||1,eff:+$("cs-eff").value||1,
+  dev:dev,inA:$("cs-inauto").checked?null:+$("cs-in").value,bs3036:$("cs-3036").checked,ozs:+$("cs-ozs").value,ot:+$("cs-ot").value,
+  cable:$("cs-cable").value,method:$("cs-method").value,amb:+$("cs-amb").value,ground:+$("cs-gnd").value,grp:$("cs-grp").value,n:+$("cs-n").value||1,
+  cg:+$("cs-cg").value||1,ins:$("cs-ins").value,len:+$("cs-len").value,use:$("cs-use").value,priv:$("cs-priv").checked,ze:+$("cs-ze").value,
+  uo:230,ipf:$("cs-ipfchk").checked?+$("cs-ipf").value:null};
+}
+function f(v,d){return(v===null||v===undefined)?"-":v.toFixed(d);}
+function yn(v){return v===null?"-":(v?"✔":"✘");}
+function cls(v){return v===null?"":(v?"p":"f");}
+var last=null,lastIn=null;
+function summary(i,r){
+ var L=["CABLE SIZING - BS 7671 method (indicative)","Cable:  "+r.cable,"Method: "+r.method,
+  "Ib = "+r.ib.toFixed(2)+" A   In = "+r.inA+" A ("+i.dev+")",
+  "Ca "+r.ca.toFixed(3)+" x Cg "+r.cg.toFixed(3)+" x Ci "+r.ci.toFixed(3)+" x Cc "+r.cc.toFixed(3)+"  ->  It = "+r.it.toFixed(1)+" A",
+  "Length "+i.len+" m, VD limit "+r.vdl+" %"];
+ var s=r.rec;
+ if(s){L.push("RECOMMENDED: "+s.csa+" mm2  (governed by "+r.gov+")");
+  L.push("  Iz "+s.iz.toFixed(1)+" A  |  VD "+s.vd.toFixed(2)+" V = "+s.vdp.toFixed(2)+" %  |  max length at limit "+Math.round(s.maxL)+" m");
+  L.push("  Zs "+s.zs.toFixed(3)+" ohm (max "+(s.zsMax!==null&&s.zsMax!==undefined?s.zsMax.toFixed(3):"n/a")+")");
+  if(s.smin!==null)L.push("  CPC/armour "+s.cpcA+" mm2 vs adiabatic minimum "+s.smin.toFixed(2)+" mm2 (t = "+s.t+" s)");
+ }else L.push("NO COMPLIANT SIZE FOUND");
+ r.W.forEach(function(w){L.push("Warning: "+w);});
+ L.push("Indicative only - verify against the current BS 7671 and the cable data sheet.");
+ return L.join("\n");
+}
+function render(){
+ var i,r;
+ try{i=read();r=calc(i);}catch(e){$("cs-head").textContent="";$("cs-rec").className="cs-rec bad";$("cs-rec").textContent="Cannot calculate";$("cs-sub").textContent=e.message;$("cs-tab").innerHTML="";$("cs-warn").textContent="";last=null;return;}
+ last=summary(i,r);
+ $("cs-head").innerHTML="Ib <b>"+r.ib.toFixed(1)+" A</b> &middot; In <b>"+r.inA+" A</b> &middot; Ca "+r.ca.toFixed(3)+" &times; Cg "+r.cg.toFixed(3)+" &times; Ci "+r.ci.toFixed(3)+" &times; Cc "+r.cc.toFixed(3)+" &rarr; It <b>"+r.it.toFixed(1)+" A</b> &middot; VD limit "+r.vdl+" %";
+ if(r.rec){$("cs-rec").className="cs-rec ok";$("cs-rec").textContent="Recommended: "+r.rec.csa+" mm²";
+  $("cs-sub").textContent="Governed by "+r.gov+". Iz "+r.rec.iz.toFixed(1)+" A, VD "+r.rec.vd.toFixed(2)+" V ("+r.rec.vdp.toFixed(2)+" %), Zs "+r.rec.zs.toFixed(3)+" Ω, max length at VD limit "+Math.round(r.rec.maxL)+" m.";
+ }else{$("cs-rec").className="cs-rec bad";$("cs-rec").textContent="No compliant size in library";$("cs-sub").textContent="";}
+ var h="<tr><th>mm²</th><th>Rating A</th><th>Iz A</th><th>Therm</th><th>VD V</th><th>VD %</th><th>Max m</th><th>Zs Ω</th><th>Zs max</th><th>Zs</th><th>CPC mm²</th><th>Min CPC</th><th>CPC</th><th>All</th></tr>";
+ r.sizes.forEach(function(s){
+  h+="<tr"+(r.rec&&s.csa===r.rec.csa?' class="cs-r"':"")+"><td>"+s.csa+"</td><td>"+s.tab+"</td><td>"+f(s.iz,1)+"</td><td class='"+cls(s.thermal)+"'>"+yn(s.thermal)+"</td><td>"+f(s.vd,2)+"</td><td class='"+cls(s.vdok)+"'>"+f(s.vdp,2)+"</td><td>"+Math.round(s.maxL)+"</td><td>"+f(s.zs,3)+"</td><td>"+f(s.zsMax,3)+"</td><td class='"+cls(s.zsok)+"'>"+yn(s.zsok)+"</td><td>"+s.cpcA+"</td><td>"+f(s.smin,2)+"</td><td class='"+cls(s.cpcok)+"'>"+yn(s.cpcok)+"</td><td class='"+(s.ok?"p":"f")+"'>"+(s.ok?"PASS":"FAIL")+"</td></tr>";
+ });
+ $("cs-tab").innerHTML=h;
+ $("cs-warn").innerHTML=r.W.map(function(w){return "&bull; "+w.replace(/&/g,"&amp;").replace(/</g,"&lt;");}).join("<br>");
+ lastIn=i;
+}
+function sync(){
+ var useIb=$("cs-ibchk").checked;$("cs-kw").disabled=useIb;$("cs-ib").disabled=!useIb;
+ $("cs-in").disabled=$("cs-inauto").checked;
+ var o=$("cs-dev").value==="OTHER";$("cs-ozs").disabled=!o;$("cs-ot").disabled=!o;
+ var g=$("cs-grp").value;$("cs-cg").disabled=g!=="custom";$("cs-n").disabled=g==="custom";
+ var mt=$("cs-method").value,b=(mt==="GROUND"||mt==="DUCT");$("cs-gnd").disabled=!b;$("cs-amb").disabled=b;
+ $("cs-ipf").disabled=!$("cs-ipfchk").checked;
+}
+function fillMethods(){
+ var c=D.CABLE_LIBRARY[$("cs-cable").value],s=$("cs-method");s.innerHTML="";
+ c.methods.forEach(function(m){var o=document.createElement("option");o.value=m;o.textContent=M[m];s.appendChild(o);});
+ $("cs-phase").value=String(c.phases);
+ $("cs-src").textContent="Data source: "+c.source;
+}
+(function init(){
+ var cs=$("cs-cable");Object.keys(D.CABLE_LIBRARY).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=D.CABLE_LIBRARY[k].name;cs.appendChild(o);});
+ var is=$("cs-ins");Object.keys(D.INSULATION_OPTIONS).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=D.INSULATION_OPTIONS[k][0];is.appendChild(o);});
+ fillMethods();sync();render();
+ $("cs-cable").addEventListener("change",function(){fillMethods();sync();render();});
+ var ids=["cs-phase","cs-kw","cs-ibchk","cs-ib","cs-pf","cs-eff","cs-dev","cs-inauto","cs-in","cs-3036","cs-ozs","cs-ot","cs-method","cs-amb","cs-gnd","cs-grp","cs-n","cs-cg","cs-ins","cs-len","cs-use","cs-priv","cs-ze","cs-ipfchk","cs-ipf"];
+ ids.forEach(function(id){var e=$(id);e.addEventListener("input",function(){sync();render();});e.addEventListener("change",function(){sync();render();});});
+ $("cs-copy").addEventListener("click",function(){
+  if(!last)return;var b=$("cs-copy");
+  function done(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy summary";},1400);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(last).then(done,function(){});}
+  else{var t=document.createElement("textarea");t.value=last;document.body.appendChild(t);t.select();try{document.execCommand("copy");done();}catch(e){}document.body.removeChild(t);}
+ });
+ window.csCalc=calc;
+})();
+})();
+</script>
+
 
 </body>
 </html>
