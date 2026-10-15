@@ -2,7 +2,7 @@
 // Caches the calculator page + icons so it opens instantly and works offline
 // once it's been loaded (and installed to a home screen) at least once.
 
-const CACHE_NAME = 'mep-quick-calcs-v9';
+const CACHE_NAME = 'mep-quick-calcs-v10';
 const CACHE_URLS = [
   '/tools-calculator.html',
   '/manifest.json',
@@ -25,7 +25,7 @@ self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(names) {
       return Promise.all(
-        names.filter(function(n) { return n !== CACHE_NAME; })
+        names.filter(function(n) { return n.indexOf('mep-quick-calcs-') === 0 && n !== CACHE_NAME; })
              .map(function(n) { return caches.delete(n); })
       );
     }).then(function() {

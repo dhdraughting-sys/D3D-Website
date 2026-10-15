@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CDE Register</title>
+<meta name="description" content="Read-only phone view of the MEP Drawing Platform CDE register.">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CDE">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="top-row">
+      <h1>CDE Register</h1>
+      <button id="loadBtn" class="btn primary" type="button">Load register</button>
+    </div>
+    <div id="meta" class="meta" role="status"></div>
+    <select id="project" class="project" aria-label="Project" hidden></select>
+  </header>
+
+  <main id="main"></main>
+
+  <nav class="tabs" id="tabs" aria-label="Sections" hidden>
+    <button data-tab="docs" type="button" aria-current="page">Documents</button>
+    <button data-tab="tx" type="button">Transmittals</button>
+    <button data-tab="promo" type="button">Promotions</button>
+  </nav>
+</div>
+
+<input id="file" type="file" accept=".json,application/json" hidden>
+
+<div id="scrim" class="scrim" hidden></div>
+<section id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-grab"></div>
+  <div id="sheetBody"></div>
+</section>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
