@@ -202,6 +202,41 @@
   .sw-chip em{font-style:normal;font-weight:600;font-size:12px;color:var(--steel);margin-left:6px;}
   .sw-checks label.sw-dev-opt{color:#a9c0cf;cursor:not-allowed;}
   .sw-checks label.sw-dev-opt em{font-style:normal;font-size:12px;}
+
+  .sw-gallery{background:var(--paper);}
+  .sw-tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:26px;}
+  .sw-tab{font:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:24px;border:1.5px solid var(--accent-2);background:#fff;color:var(--accent-2);cursor:pointer;transition:background .15s,color .15s;}
+  .sw-tab:hover{background:#e4ecf1;}
+  .sw-tab[aria-selected="true"]{background:var(--accent-2);color:#fff;}
+  .sw-tab:focus-visible,.sw-thumb:focus-visible,.sw-main:focus-visible,.sw-lb button:focus-visible{outline:3px solid #7fb0d8;outline-offset:2px;}
+  .js .sw-panel[hidden]{display:none;}
+  .sw-panel-head{max-width:760px;margin:0 auto 20px;text-align:center;}
+  .sw-panel-head h3{font-size:1.4rem;margin-bottom:6px;}
+  .sw-panel-head p{color:var(--steel);}
+  .sw-shot{max-width:980px;margin:0 auto;}
+  .sw-main{display:block;width:100%;padding:0;border:1px solid #d5dbe1;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 14px 40px rgba(22,27,34,.14);cursor:zoom-in;}
+  .sw-main img{width:100%;height:auto;display:block;}
+  .sw-shot figcaption{margin-top:12px;text-align:center;color:var(--steel);font-size:.95rem;}
+  .sw-shot figcaption b{color:var(--ink);}
+  .sw-thumbs{max-width:980px;margin:18px auto 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .sw-thumb{padding:0;border:2px solid transparent;border-radius:8px;background:#fff;cursor:pointer;overflow:hidden;text-align:left;font:inherit;box-shadow:0 2px 8px rgba(22,27,34,.10);}
+  .sw-thumb img{width:100%;height:auto;display:block;}
+  .sw-thumb span{display:block;padding:6px 8px;font-size:12px;font-weight:600;color:var(--steel-dark);line-height:1.3;}
+  .sw-thumb.on{border-color:var(--accent-2);}
+  .sw-lb{position:fixed;inset:0;z-index:300;background:rgba(14,20,27,.92);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;}
+  .sw-lb.open{display:flex;}
+  .sw-lb img{max-width:min(96vw,1389px);max-height:80vh;width:auto;height:auto;border-radius:6px;background:#fff;}
+  .sw-lb p{color:#dbe3ea;margin-top:14px;text-align:center;font-size:.95rem;max-width:80ch;}
+  .sw-lb button{position:absolute;background:rgba(255,255,255,.14);color:#fff;border:0;width:46px;height:46px;border-radius:50%;font-size:24px;cursor:pointer;}
+  .sw-lb .lb-close{top:16px;right:16px;}
+  .sw-lb .lb-prev{left:16px;top:50%;}
+  .sw-lb .lb-next{right:16px;top:50%;}
+  @media(max-width:560px){
+    .sw-tabs{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;margin-left:-24px;margin-right:-24px;padding-left:24px;padding-right:24px;}
+    .sw-tab{white-space:nowrap;flex:none;}
+    .sw-thumbs{grid-template-columns:repeat(2,1fr);}
+    .sw-lb .lb-prev,.sw-lb .lb-next{top:auto;bottom:16px;}
+  }
   .sw-faq{background:var(--paper);}
   .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
   .faq-grid .card:hover{transform:none;box-shadow:none;}
@@ -256,7 +291,7 @@
     <span class="eyebrow">Software</span>
     <h1>MEP software for design teams</h1>
     <p>Drawing review, calculations, take-off, model viewing and project tracking. Tell us which programs you need and for how long, and we will send you a licensed installer and a short guide.</p>
-    <div class="hero-ctas" style="margin-top:26px;"><a class="btn btn-primary" style="background:#fff;color:var(--accent-2);" href="#request">Request software</a></div>
+    <div class="hero-ctas" style="margin-top:26px;"><a class="btn btn-primary" style="background:#fff;color:var(--accent-2);" href="#request">Request software</a><a class="btn" style="background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.7);" href="#screens">See it in action</a></div>
   </div>
 </section>
 
@@ -276,7 +311,7 @@
       <div class="app-card secondary">
         <span class="app-tag">Viewer</span>
         <h3>MEP Model Viewer</h3>
-        <p>Model viewing for your design projects.</p>
+        <p>View IFC models of services and structure in 3D, click any element for its data, and take quantities off the model.</p>
       </div>
     </div>
     <p class="sw-chips-label">Also in the suite</p>
@@ -287,6 +322,58 @@
         <span class="sw-chip">MEP Design Tracker</span>
         <span class="sw-chip">MEP O&amp;M Manual Builder</span>
     </div>
+  </div>
+</section>
+
+
+<section class="sw-gallery" id="screens">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">See it in action</span>
+      <h2>Real screens from the software</h2>
+      <p>Every image is the actual program, shown on one fictitious example job (Alder Court office refit). No client data appears.</p>
+    </div>
+    <div class="sw-tabs" role="tablist" aria-label="Choose a program"><button type="button" role="tab" class="sw-tab" id="tab-design-platform" aria-controls="panel-design-platform" aria-selected="true" data-k="design-platform">Design Platform</button><button type="button" role="tab" class="sw-tab" id="tab-model-viewer" aria-controls="panel-model-viewer" aria-selected="false" data-k="model-viewer">Model Viewer</button><button type="button" role="tab" class="sw-tab" id="tab-drawing-platform" aria-controls="panel-drawing-platform" aria-selected="false" data-k="drawing-platform">Drawing Platform</button><button type="button" role="tab" class="sw-tab" id="tab-design-tracker" aria-controls="panel-design-tracker" aria-selected="false" data-k="design-tracker">Design Tracker</button><button type="button" role="tab" class="sw-tab" id="tab-om-manual" aria-controls="panel-om-manual" aria-selected="false" data-k="om-manual">O&amp;M Manual Builder</button></div>
+      <div class="sw-panel" role="tabpanel" id="panel-design-platform" aria-labelledby="tab-design-platform">
+        <div class="sw-panel-head"><h3>Design Platform</h3><p>From room schedule to heating, cooling, ventilation, water services and predicted energy, worked through in one program.</p></div>
+        <figure class="sw-shot">
+          <button type="button" class="sw-main" aria-label="Enlarge screenshot"><img src="img/software/design-platform-01-home.jpg" alt="Design Platform: Home" width="1389" height="828"></button>
+          <figcaption><b>Home</b> &mdash; Project totals, predicted energy and the room list at a glance.</figcaption>
+        </figure>
+        <div class="sw-thumbs" role="list"><button type="button" role="listitem" class="sw-thumb on" data-src="img/software/design-platform-01-home.jpg" data-title="Home" data-cap="Project totals, predicted energy and the room list at a glance." aria-label="Home"><img src="img/software/design-platform-01-home.jpg" alt="" loading="lazy" width="1389" height="828"><span>Home</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-02-hvac-fcu.jpg" data-title="HVAC and FCU selection" data-cap="Room loads and fan coil or cooling unit selection." aria-label="HVAC and FCU selection"><img src="img/software/design-platform-02-hvac-fcu.jpg" alt="" loading="lazy" width="1389" height="828"><span>HVAC and FCU selection</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-03-ventilation.jpg" data-title="Ventilation" data-cap="Ventilation rates and sizing." aria-label="Ventilation"><img src="img/software/design-platform-03-ventilation.jpg" alt="" loading="lazy" width="1389" height="828"><span>Ventilation</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-04-grilles.jpg" data-title="Grilles and diffusers" data-cap="Grille and diffuser selection for each room." aria-label="Grilles and diffusers"><img src="img/software/design-platform-04-grilles.jpg" alt="" loading="lazy" width="1389" height="828"><span>Grilles and diffusers</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-05-water.jpg" data-title="Water services" data-cap="Domestic water loading units and pipe sizing." aria-label="Water services"><img src="img/software/design-platform-05-water.jpg" alt="" loading="lazy" width="1389" height="828"><span>Water services</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-06-fabric.jpg" data-title="Fabric elements" data-cap="U-values and fabric elements for each room." aria-label="Fabric elements"><img src="img/software/design-platform-06-fabric.jpg" alt="" loading="lazy" width="1389" height="828"><span>Fabric elements</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-07-pipe-sizing.jpg" data-title="LTHW and CHW pipe sizing" data-cap="Heating and chilled water pipework." aria-label="LTHW and CHW pipe sizing"><img src="img/software/design-platform-07-pipe-sizing.jpg" alt="" loading="lazy" width="1389" height="828"><span>LTHW and CHW pipe sizing</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-platform-08-energy.jpg" data-title="Energy consumption" data-cap="Predicted annual energy, cost and carbon." aria-label="Energy consumption"><img src="img/software/design-platform-08-energy.jpg" alt="" loading="lazy" width="1389" height="828"><span>Energy consumption</span></button></div>
+      </div>
+      <div class="sw-panel" role="tabpanel" id="panel-model-viewer" aria-labelledby="tab-model-viewer" data-lazy="1">
+        <div class="sw-panel-head"><h3>Model Viewer</h3><p>Open an IFC model of services and structure in 3D, click any element to see its data, and pull lengths into a quantities schedule.</p></div>
+        <figure class="sw-shot">
+          <button type="button" class="sw-main" aria-label="Enlarge screenshot"><img src="img/software/model-viewer-01-model.jpg" alt="Model Viewer: Services and structure" loading="lazy" width="1389" height="828"></button>
+          <figcaption><b>Services and structure</b> &mdash; Services and structure together in 3D (the program's built-in sample model).</figcaption>
+        </figure>
+        <div class="sw-thumbs" role="list"><button type="button" role="listitem" class="sw-thumb on" data-src="img/software/model-viewer-01-model.jpg" data-title="Services and structure" data-cap="Services and structure together in 3D (the program's built-in sample model)." aria-label="Services and structure"><img src="img/software/model-viewer-01-model.jpg" alt="" loading="lazy" width="1389" height="828"><span>Services and structure</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/model-viewer-02-properties.jpg" data-title="Element properties" data-cap="Click any element to see its data." aria-label="Element properties"><img src="img/software/model-viewer-02-properties.jpg" alt="" loading="lazy" width="1389" height="828"><span>Element properties</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/model-viewer-03-quantities.jpg" data-title="Quantities schedule" data-cap="Duct, pipe and containment lengths." aria-label="Quantities schedule"><img src="img/software/model-viewer-03-quantities.jpg" alt="" loading="lazy" width="1389" height="828"><span>Quantities schedule</span></button></div>
+      </div>
+      <div class="sw-panel" role="tabpanel" id="panel-drawing-platform" aria-labelledby="tab-drawing-platform" data-lazy="1">
+        <div class="sw-panel-head"><h3>Drawing Platform</h3><p>Review PDF drawings with rectangle, arrow and call-out markups.</p></div>
+        <figure class="sw-shot">
+          <button type="button" class="sw-main" aria-label="Enlarge screenshot"><img src="img/software/drawing-platform-01-markup.jpg" alt="Drawing Platform: Markup on a floor plan" loading="lazy" width="1389" height="828"></button>
+          <figcaption><b>Markup on a floor plan</b> &mdash; Rectangle, arrow and call-out markups on a ground floor plan PDF.</figcaption>
+        </figure>
+        
+      </div>
+      <div class="sw-panel" role="tabpanel" id="panel-design-tracker" aria-labelledby="tab-design-tracker" data-lazy="1">
+        <div class="sw-panel-head"><h3>Design Tracker</h3><p>Keep design comments in one register, and see at a glance what is open, closed or overdue and who has to act.</p></div>
+        <figure class="sw-shot">
+          <button type="button" class="sw-main" aria-label="Enlarge screenshot"><img src="img/software/design-tracker-01-register.jpg" alt="Design Tracker: Register" loading="lazy" width="1389" height="828"></button>
+          <figcaption><b>Register</b> &mdash; A comments register with A / B / C status badges.</figcaption>
+        </figure>
+        <div class="sw-thumbs" role="list"><button type="button" role="listitem" class="sw-thumb on" data-src="img/software/design-tracker-01-register.jpg" data-title="Register" data-cap="A comments register with A / B / C status badges." aria-label="Register"><img src="img/software/design-tracker-01-register.jpg" alt="" loading="lazy" width="1389" height="828"><span>Register</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/design-tracker-02-dashboard.jpg" data-title="Dashboard" data-cap="Open, closed and overdue counts, and who has to act." aria-label="Dashboard"><img src="img/software/design-tracker-02-dashboard.jpg" alt="" loading="lazy" width="1389" height="828"><span>Dashboard</span></button></div>
+      </div>
+      <div class="sw-panel" role="tabpanel" id="panel-om-manual" aria-labelledby="tab-om-manual" data-lazy="1">
+        <div class="sw-panel-head"><h3>O&amp;M Manual Builder</h3><p>Build an operation and maintenance manual from project details, a project directory and an asset register.</p></div>
+        <figure class="sw-shot">
+          <button type="button" class="sw-main" aria-label="Enlarge screenshot"><img src="img/software/om-manual-00-sections.jpg" alt="O&amp;M Manual Builder: Manual sections" loading="lazy" width="1389" height="828"></button>
+          <figcaption><b>Manual sections</b> &mdash; The blank manual structure, ready to fill.</figcaption>
+        </figure>
+        <div class="sw-thumbs" role="list"><button type="button" role="listitem" class="sw-thumb on" data-src="img/software/om-manual-00-sections.jpg" data-title="Manual sections" data-cap="The blank manual structure, ready to fill." aria-label="Manual sections"><img src="img/software/om-manual-00-sections.jpg" alt="" loading="lazy" width="1389" height="828"><span>Manual sections</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/om-manual-01-details.jpg" data-title="Project details" data-cap="Title, client, job reference and revision." aria-label="Project details"><img src="img/software/om-manual-01-details.jpg" alt="" loading="lazy" width="1389" height="828"><span>Project details</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/om-manual-02-directory.jpg" data-title="Project directory" data-cap="Contacts for the project." aria-label="Project directory"><img src="img/software/om-manual-02-directory.jpg" alt="" loading="lazy" width="1389" height="828"><span>Project directory</span></button><button type="button" role="listitem" class="sw-thumb" data-src="img/software/om-manual-03-assets.jpg" data-title="Asset register" data-cap="Plant and equipment with serial numbers and service intervals." aria-label="Asset register"><img src="img/software/om-manual-03-assets.jpg" alt="" loading="lazy" width="1389" height="828"><span>Asset register</span></button></div>
+      </div>
   </div>
 </section>
 
@@ -366,6 +453,70 @@
     </div>
   </div>
 </section>
+
+
+<div class="sw-lb" id="sw-lb" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+  <button type="button" class="lb-close" aria-label="Close">&times;</button>
+  <button type="button" class="lb-prev" aria-label="Previous screenshot">&#8249;</button>
+  <img id="sw-lb-img" alt="">
+  <p id="sw-lb-cap"></p>
+  <button type="button" class="lb-next" aria-label="Next screenshot">&#8250;</button>
+</div>
+<script>
+(function(){
+  document.documentElement.classList.add("js");
+  var tabs=[].slice.call(document.querySelectorAll(".sw-tab"));
+  var panels=[].slice.call(document.querySelectorAll(".sw-panel"));
+  function show(k,focus){
+    tabs.forEach(function(t){var on=t.dataset.k===k;t.setAttribute("aria-selected",on?"true":"false");t.tabIndex=on?0:-1;if(on&&focus)t.focus();});
+    panels.forEach(function(p){p.hidden=(p.id!=="panel-"+k);});
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener("click",function(){show(t.dataset.k);});
+    t.addEventListener("keydown",function(e){
+      var n=null;
+      if(e.key==="ArrowRight")n=tabs[(i+1)%tabs.length];
+      else if(e.key==="ArrowLeft")n=tabs[(i-1+tabs.length)%tabs.length];
+      if(n){e.preventDefault();show(n.dataset.k,true);}
+    });
+  });
+  show(tabs[0].dataset.k);
+  panels.forEach(function(p){
+    var main=p.querySelector(".sw-main img"), cap=p.querySelector("figcaption");
+    p.querySelectorAll(".sw-thumb").forEach(function(b){
+      b.addEventListener("click",function(){
+        main.src=b.dataset.src; main.alt=p.querySelector("h3").textContent+": "+b.dataset.title;
+        cap.innerHTML="<b></b> &mdash; <span></span>"; cap.firstChild.textContent=b.dataset.title; cap.lastChild.textContent=b.dataset.cap;
+        p.querySelectorAll(".sw-thumb").forEach(function(x){x.classList.toggle("on",x===b);});
+      });
+    });
+  });
+  /* lightbox */
+  var lb=document.getElementById("sw-lb"), lbImg=document.getElementById("sw-lb-img"), lbCap=document.getElementById("sw-lb-cap");
+  var cur=null, list=[], idx=0, opener=null;
+  function load(){var it=list[idx];lbImg.src=it.src;lbImg.alt=it.title;lbCap.textContent=it.title+" — "+it.cap;
+    lb.querySelector(".lb-prev").style.display=lb.querySelector(".lb-next").style.display=list.length>1?"":"none";}
+  function open(p,btn){
+    var th=[].slice.call(p.querySelectorAll(".sw-thumb"));
+    if(th.length){list=th.map(function(b){return {src:b.dataset.src,title:b.dataset.title,cap:b.dataset.cap};});
+      var on=th.filter(function(b){return b.classList.contains("on");})[0]; idx=Math.max(0,th.indexOf(on));}
+    else{var im=p.querySelector(".sw-main img");list=[{src:im.getAttribute("src"),title:im.alt,cap:p.querySelector("figcaption").textContent}];idx=0;}
+    opener=btn; load(); lb.classList.add("open"); lb.querySelector(".lb-close").focus(); document.body.style.overflow="hidden";
+  }
+  function close(){lb.classList.remove("open");document.body.style.overflow="";if(opener)opener.focus();}
+  function step(d){idx=(idx+d+list.length)%list.length;load();}
+  panels.forEach(function(p){p.querySelector(".sw-main").addEventListener("click",function(){open(p,this);});});
+  lb.querySelector(".lb-close").addEventListener("click",close);
+  lb.querySelector(".lb-prev").addEventListener("click",function(){step(-1);});
+  lb.querySelector(".lb-next").addEventListener("click",function(){step(1);});
+  lb.addEventListener("click",function(e){if(e.target===lb)close();});
+  document.addEventListener("keydown",function(e){
+    if(!lb.classList.contains("open"))return;
+    if(e.key==="Escape")close(); else if(e.key==="ArrowLeft")step(-1); else if(e.key==="ArrowRight")step(1);
+  });
+})();
+</script>
+
 
 <script>
 /* The address requests are sent to - change this one line. */
